@@ -16,7 +16,7 @@ Lexer::Lexer(std::istream &input) : m_input(input)
   m_string_tokens["\""] = TokenType::QUOTE;
   m_string_tokens["="] = TokenType::ASSIGNMENT;
   m_string_tokens["+"] = TokenType::PLUS;
-  m_string_tokens["+="] = TokenType::PLUSEQUAL;
+  m_string_tokens["*"] = TokenType::MULTIPLICATION;
   m_string_tokens["void"] = TokenType::VOID_TOKEN;
   m_string_tokens["int"] = TokenType::INT_TOKEN;
 

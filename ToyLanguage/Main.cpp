@@ -27,12 +27,11 @@ int main()
   tokenToString[TokenType::VARIABLE] = "Variable";
   tokenToString[TokenType::ASSIGNMENT] = "Assignment";
   tokenToString[TokenType::PLUS] = "Plus";
-  tokenToString[TokenType::PLUSEQUAL] = "PlusEqual";
   tokenToString[TokenType::VOID_TOKEN] = "Void";
   tokenToString[TokenType::INT_TOKEN] = "Int";
   tokenToString[TokenType::QUOTE] = "Quote";
   tokenToString[TokenType::IDENT] = "Identifier";
-
+  tokenToString[TokenType::MULTIPLICATION] = "Multiplication";
 
   
 

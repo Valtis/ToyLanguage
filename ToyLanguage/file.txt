@@ -2,18 +2,19 @@
 
 fn main():void 
 {
-  println("aloitetaan");
-  var kerroin:int = 2;
-  var summa:int=3;
-  var tulos:int = 0;
+  println("let's begin");
+  var multiplier:int = 2;
+  var addition:int=3;
+  var result:int = 0;
   
-  while (tulos < 100)
+  while (result < 100)
   {
-    tulos += summa + tulos*kerroin;
-    tulos+=1;
-    println("Tulokseni on nyt: " + tulos);
+    result += addition + result*multiplier;
+    result+=1;
+    println("Result is now: " + result);
   }  
 
-  println("Poistuttiin silmukasta!");
+  println("Aaaaaand out of the loop!");
+  println("Syntax error goes here);
 
 }
