@@ -124,7 +124,14 @@ void Lexer::AddTokenFromCharacters(std::string characters)
   {
     if (m_string_tokens.count(characters) == 0)
     {
-      m_syntax_tokens.push_back(Token{ TokenType::IDENT, characters, m_current_line });
+      if (isdigit(characters[0]))
+      {
+        m_syntax_tokens.push_back(Token{ TokenType::NUMBER, characters, m_current_line });
+      }
+      else
+      {
+        m_syntax_tokens.push_back(Token{ TokenType::IDENT, characters, m_current_line });
+      }  
     }
     else
     {
