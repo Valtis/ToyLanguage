@@ -17,12 +17,17 @@ public:
   
 private:
   std::istream &m_input;
+  std::vector<Token> m_syntax_tokens;
 
-  void HandleLines(std::vector<Token> &syntax_tokens);
+  void HandleLines();
 
-  void HandleLine(std::string &line, std::vector<Token> &syntax_tokens);
+  void HandleLine(std::string &line);
 
-  void HandleComplexToken(std::string token, std::vector<Token> &syntax_tokens);
+  void HandleTokens(std::string &str_token);
+
+  void HandleComplexToken(std::string token);
+
+  void AddTokenFromCharacters(std::string characters);
 
   std::unordered_map<std::string, TokenType> m_string_tokens;
 };
