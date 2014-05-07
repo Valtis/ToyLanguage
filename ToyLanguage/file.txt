@@ -1,4 +1,6 @@
-
+fn terve(var variable:int, var variable2:int):int {
+	
+}
 
 fn main():void 
 {

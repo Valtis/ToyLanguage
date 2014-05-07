@@ -41,3 +41,26 @@ vector<string> Utility::Tokenize(const string &text, const string &delimiters)
   delete [] textBuffer;
   return tokens;
 }
+
+string Utility::Trim(const string &line)
+{
+  const char *WHITE_SPACE_TOKENS = " \n\t\r";
+
+  int beginning = line.find_first_not_of(WHITE_SPACE_TOKENS);
+
+  if (beginning == string::npos)
+  {
+    return "";
+  }
+
+  string ret = line.substr(beginning);
+
+  int end = ret.find_last_not_of(WHITE_SPACE_TOKENS);
+
+  if (end == string::npos)
+  {
+    end = ret.length();
+  }
+
+  return ret.substr(0, end + 1);
+}

@@ -1,6 +1,8 @@
 #include <fstream>
 #include <iostream>
 #include "Lexer.h"
+#include "Parser.h"
+
 
 int main()
 {
@@ -39,7 +41,7 @@ int main()
 
   auto tokens = lexer.AnalyzeText();
 
-  for (auto t : tokens.second)
+ /* for (auto t : tokens.second)
   {
     std::string str = "TokenType: " + tokenToString[t.Type()];
     for (int i = str.length(); i < 30; ++i)
@@ -49,6 +51,16 @@ int main()
     str += "Value: " + t.Value();
 
     std::cout << str << "\n";
+  }
+  */
+  Parser parser(tokens);
+  try   
+  {
+    parser.Parse();
+  }
+  catch (const std::exception &ex)
+  {
+    std::cout << ex.what();
   }
 
 
