@@ -26,7 +26,7 @@ private:
   void HandleComplexToken(std::string token);
 
   void AddTokenFromCharacters(std::string characters);
-
+  void RemoveComment(std::string & line);
   std::unordered_map<std::string, TokenType> m_string_tokens;
   std::istream &m_input;
   std::vector<std::string> m_lines;

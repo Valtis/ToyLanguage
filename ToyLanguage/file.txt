@@ -1,22 +1,8 @@
-fn terve(var variable:int, var variable2:int):int {
-	
+fn function():int {
+ 
 }
 
 fn main():void 
 {
-  println("let's begin");
-  var multiplier:int = 2;
-  var addition:int=3;
-  var result:int = 0;
-  
-  while (result < 100)
-  {
-    result += addition + result*multiplier;
-    result+=1;
-    println("Result is now: " + result);
-  }  
-
-  println("Aaaaaand out of the loop!");
-  println("Syntax error goes here);
-
+ function();
 }

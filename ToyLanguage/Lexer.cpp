@@ -1,11 +1,14 @@
 #include "Lexer.h"
 #include "StringUtility.h"
 #include <sstream>
+#include <algorithm>
 #include <iostream>
 
 Lexer::Lexer(std::istream &input) : m_input(input), m_current_line(1)
 {
   m_string_tokens["fn"] = TokenType::FUNCTION;
+  m_string_tokens["while"] = TokenType::WHILE;
+  m_string_tokens["if"] = TokenType::IF;
   m_string_tokens["("] = TokenType::LPAREN;
   m_string_tokens[")"] = TokenType::RPAREN;
   m_string_tokens["{"] = TokenType::LBRACE;
@@ -48,6 +51,7 @@ void Lexer::HandleLines()
 
 void Lexer::HandleLine(std::string &line)
 {
+  RemoveComment(line);
   m_lines.push_back(line);
   auto str_tokens = Utility::Tokenize(line, "\"");
   int pos = 0;
@@ -128,4 +132,11 @@ void Lexer::AddTokenFromCharacters(std::string characters)
 
     }
   }
+}
+
+void Lexer::RemoveComment(std::string & line)
+{
+  auto comment_start = std::find(line.begin(), line.end(), '#');
+  int dist = std::distance(line.begin(), comment_start);
+  line = line.substr(0, dist);
 }

@@ -4,6 +4,8 @@
 Parser::Parser(std::pair<std::vector<std::string>, std::vector<Token>> &tokens) : m_lines(tokens.first), m_tokens(tokens.second), m_current_token(m_tokens.begin())
 {
   token_to_string[TokenType::FUNCTION] = "function declaration";
+  token_to_string[TokenType::WHILE] = "while";
+  token_to_string[TokenType::IF] = "if";
   token_to_string[TokenType::TEXT] = "Text";
   token_to_string[TokenType::NUMBER] = "Number";
   token_to_string[TokenType::LPAREN] = "(";
@@ -53,12 +55,12 @@ void Parser::ParseFunction()
   // start new function AST
 
   Expect(TokenType::LPAREN);
-  
+
   if (PeekNextToken().Type() == TokenType::VARIABLE)
   {
     ParseVariableList();
   }
-    
+
   Expect(TokenType::RPAREN);
   Expect(TokenType::COLON);
 
@@ -71,7 +73,7 @@ void Parser::ParseFunction()
 
 void Parser::ParseVariableList()
 {
-  while (true)  
+  while (true)
   {
     Expect(TokenType::VARIABLE);
     Expect(TokenType::IDENT);
@@ -80,7 +82,7 @@ void Parser::ParseVariableList()
     if (PeekNextToken().Type() != TokenType::COMMA)
       break;
     NextToken();
-    
+
   }
 
 }
@@ -90,10 +92,87 @@ void Parser::ParseBlock()
 
   Expect(TokenType::LBRACE);
 
+  switch (PeekNextToken().Type())
+  {
+  case TokenType::VARIABLE:
+
+    break;
+  case TokenType::IDENT:
+      ParseStatement();
+    
+    break;
+  case TokenType::WHILE:
+    break;
+  case TokenType::IF:
+    break;
+  case TokenType::RBRACE:
+    break;
+
+  default:
+    InvalidTokenError("Expected variable declaration, identifier or statement");
+  }
 
 
-  
   Expect(TokenType::RBRACE);
+}
+
+void Parser::ParseStatement() 
+{
+  Expect(TokenType::IDENT);
+  
+  NextToken();
+  switch (m_current_token->Type())
+  {
+  case TokenType::LPAREN:
+    ParseFunctionCallParameters();
+    break;
+  case TokenType::ASSIGNMENT:
+    break;
+  case TokenType::PLUS:
+    break;
+  case TokenType::SEMICOLON:
+    return;
+  default:
+    InvalidTokenError("Expected expression");
+  }
+
+  Expect(TokenType::SEMICOLON);
+}
+
+void Parser::ParseFunctionCallParameters()
+{
+  /*while (true)
+  {
+    NextToken();
+
+    if (m_current_token->Type() == TokenType::RPAREN)
+    {
+      return;
+    }
+
+    ParseExpression();
+  }*/
+}
+
+void Parser::ParseExpression()
+{
+  /*ExpectValueType();
+
+  switch (m_current_token->Type())
+  {
+  case TokenType::LPAREN:
+    ParseFunctionCallParameters();
+    break;
+  case TokenType::ASSIGNMENT:
+    break;
+  case TokenType::PLUS:
+    break;
+  case TokenType::SEMICOLON:
+    return;
+  default:
+    InvalidTokenError("Expected expression");
+  }*/
+
 
 }
 
@@ -162,6 +241,6 @@ void Parser::InvalidTokenError(std::string expected)
 std::string Parser::GetTokenErrorInfo()
 {
   int line_number = m_current_token->LineNumber();
-  return " token '" + m_current_token->Value() + "' at line " + std::to_string(line_number) + "\n\n  "
-    + m_lines[line_number-1] + "\n\n";
+  return "token '" + m_current_token->Value() + "' at line " + std::to_string(line_number) + "\n\n---> "
+    + m_lines[line_number - 1] + "\n\n";
 }

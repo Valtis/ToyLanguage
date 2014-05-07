@@ -19,12 +19,17 @@ private:;
   void ParseFunction();
   void ParseVariableList();
   void ParseBlock();
+  void ParseStatement();
+  void ParseExpression();
+  void ParseFunctionCallParameters();
+  
 
   void Expect(TokenType type);
   void ExpectType();
   void ExpectNonVoidType();
 
   void InvalidTokenError(std::string expected);
+
 
 
   std::vector<std::string> m_lines;
