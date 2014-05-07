@@ -39,7 +39,7 @@ int main()
 
   auto tokens = lexer.AnalyzeText();
 
-  for (auto t : tokens)
+  for (auto t : tokens.second)
   {
     std::string str = "TokenType: " + tokenToString[t.Type()];
     for (int i = str.length(); i < 30; ++i)

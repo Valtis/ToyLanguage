@@ -3,7 +3,7 @@
 #include <sstream>
 #include <iostream>
 
-Lexer::Lexer(std::istream &input) : m_input(input)
+Lexer::Lexer(std::istream &input) : m_input(input), m_current_line(0)
 {
   m_string_tokens["fn"] = TokenType::FUNCTION;
   m_string_tokens["("] = TokenType::LPAREN;
@@ -29,10 +29,10 @@ Lexer::~Lexer()
 }
 
 
-std::vector<Token> Lexer::AnalyzeText()
+std::pair<std::vector<std::string>, std::vector<Token>> Lexer::AnalyzeText()
 {
   HandleLines();
-  return m_syntax_tokens;
+  return { m_lines, m_syntax_tokens };
 }
 
 void Lexer::HandleLines()
@@ -41,11 +41,13 @@ void Lexer::HandleLines()
   while (getline(m_input, line))
   {
     HandleLine(line);
+    ++m_current_line;
   }
 }
 
 void Lexer::HandleLine(std::string &line)
 {
+  m_lines.push_back(line);
   auto str_tokens = Utility::Tokenize(line, "\"");
   int pos = 0;
 
@@ -54,7 +56,7 @@ void Lexer::HandleLine(std::string &line)
     ++pos;
     if (pos % 2 == 0)
     {
-      m_syntax_tokens.push_back(Token{ TokenType::TEXT, str_token });
+      m_syntax_tokens.push_back(Token{ TokenType::TEXT, str_token, m_current_line });
       continue;
     }
 
@@ -71,7 +73,7 @@ void Lexer::HandleTokens(std::string &str_token)
   {
     if (m_string_tokens.count(space_token) != 0)
     {
-      m_syntax_tokens.push_back(Token{ m_string_tokens[space_token], space_token });
+      m_syntax_tokens.push_back(Token{ m_string_tokens[space_token], space_token, m_current_line });
     }
     else
     {
@@ -100,7 +102,7 @@ void Lexer::HandleComplexToken(std::string token)
     {
       AddTokenFromCharacters(characters);
       characters = "";
-      m_syntax_tokens.push_back(Token{ m_string_tokens[chr_string], chr_string });
+      m_syntax_tokens.push_back(Token{ m_string_tokens[chr_string], chr_string, m_current_line });
     }
 
   }
@@ -115,11 +117,11 @@ void Lexer::AddTokenFromCharacters(std::string characters)
   {
     if (m_string_tokens.count(characters) == 0)
     {
-      m_syntax_tokens.push_back(Token{ TokenType::IDENT, characters });
+      m_syntax_tokens.push_back(Token{ TokenType::IDENT, characters, m_current_line });
     }
     else
     {
-      m_syntax_tokens.push_back(Token{ m_string_tokens[characters], characters });
+      m_syntax_tokens.push_back(Token{ m_string_tokens[characters], characters, m_current_line });
 
     }
   }

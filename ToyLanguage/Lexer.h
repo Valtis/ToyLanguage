@@ -13,12 +13,10 @@ public:
   Lexer(std::istream &input);
   ~Lexer();
 
-  std::vector<Token> AnalyzeText();
+  std::pair<std::vector<std::string>, std::vector<Token>> AnalyzeText();
   
 private:
-  std::istream &m_input;
-  std::vector<Token> m_syntax_tokens;
-
+  
   void HandleLines();
 
   void HandleLine(std::string &line);
@@ -30,5 +28,10 @@ private:
   void AddTokenFromCharacters(std::string characters);
 
   std::unordered_map<std::string, TokenType> m_string_tokens;
+  std::istream &m_input;
+  std::vector<std::string> m_lines;
+  std::vector<Token> m_syntax_tokens;
+  int m_current_line;
+
 };
 

@@ -1,8 +1,9 @@
 #include "Parser.h"
-
+#include "ParseError.h"
 
 Parser::Parser(std::vector<Token> &tokens) : m_tokens(tokens)
 {
+
 }
 
 
@@ -20,7 +21,22 @@ void Parser::Parse()
     switch (m_current_token.Type())
     {
 
-
+      default:
+        throw ParseError("Unexpected token ");
     }
   }
+}
+
+
+void Parser::NextToken()
+{
+
+
+}
+
+
+bool Parser::HasTokens()
+{
+
+  return false;
 }
