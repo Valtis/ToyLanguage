@@ -23,14 +23,6 @@ Parser::Parser(std::pair<std::vector<std::string>, std::vector<Token>> &tokens) 
   token_to_string[TokenType::QUOTE] = "\"";
   token_to_string[TokenType::IDENT] = "identifier";
   token_to_string[TokenType::MULTIPLICATION] = "*";
-
-
-
-  m_operation_expression_priority[OperationType::VALUE] = 0;
-  m_operation_expression_priority[OperationType::ADD] = 1;
-  m_operation_expression_priority[OperationType::MUL] = 2;
-  
-
 }
 
 
@@ -254,25 +246,6 @@ void Parser::ParseExpression(Ast_Node parent_node)
   return parent_node->AddChild(root);
 }
 
-
-
-
-void Parser::AssignmentHelper(Ast_Node &root, Ast_Node &node, Ast_Node child)
-{
-  if (root == nullptr)
-  {
-    root = child;
-    node = child;
-  }
-  else
-  {
-    node->AddChild(child);
-  }
-}
-
-
-
-
 void Parser::NextToken()
 {
   ++m_current_token;
@@ -348,19 +321,6 @@ void Parser::FunctionRedeclarationError()
     "Previous declaration at line " + std::to_string(declaration_line) + "\n\n---> " + m_lines[declaration_line - 1]);
 }
 
-void Parser::AddBlockNode()
-{
-  std::shared_ptr<AbstractSyntaxTreeNode> node(new AbstractSyntaxTreeNode{ OperationType::BLOCK });
-  if (m_root_node == nullptr)
-  {
-    m_root_node = node;
-  }
-  else
-  {
-    m_root_node->AddChild(node);
-  }
-}
-
 void Parser::VariableRedeclarationError()
 {
   int declaration_line = m_root_node->GetVariable(m_current_token->Value()).DeclarationLine();
@@ -373,18 +333,3 @@ void Parser::UndeclaredVariableError()
 {
   throw ParseError("Identifier " + GetTokenErrorInfo() + "has not been declared");
 }
-
-void Parser::ExpectExpressionType()
-{
-  auto type = m_current_token->Type();
-  if (type != TokenType::NUMBER && type != TokenType::IDENT)
-  {
-    InvalidTokenError("Expected literal, variable");
-  }
-}
-
-bool Parser::IsOperator(TokenType type)
-{
-  return type == TokenType::PLUS || type == TokenType::MULTIPLICATION;
-}
-
