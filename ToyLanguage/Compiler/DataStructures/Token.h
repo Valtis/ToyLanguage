@@ -7,7 +7,6 @@ class Token
 public:
   Token();
   Token(TokenType type, std::string token_value, int line_number);
-  
   ~Token();
 
   TokenType Type() const { return m_type; }

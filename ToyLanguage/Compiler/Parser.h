@@ -33,12 +33,13 @@ private:;
   void ExpectType();
   void ExpectNonVoidType();
 
+  bool IsOperator(TokenType type);
 
   void InvalidTokenError(std::string expected);
   void InvalidTokenError(const Token &token, std::string expected);
-  void FunctionRedeclarationError();
-  void VariableRedeclarationError();
-  void UndeclaredVariableError();
+  void RaiseFunctionRedeclarationError();
+  void RaiseVariableRedeclarationError();
+  void RaiseUndeclaredVariableError(Token token);
   std::string GetTokenErrorInfo(const Token &token);
 
   std::vector<std::string> m_lines;

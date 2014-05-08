@@ -114,9 +114,13 @@ void PrintNodeType(const Ast_Node &node)
   {
     std::cout << "Variable declaration";
   }
-  else if (node->Type() == OperationType::VALUE)
+  else if (node->Type() == OperationType::VARIABLE)
   {
-    std::cout << "Value";
+    std::cout << "Variable";
+  }
+  else if (node->Type() == OperationType::CONSTANT)
+  {
+    std::cout << "Constant";
   }
 
   std::cout << "\n";
