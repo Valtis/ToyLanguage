@@ -10,9 +10,9 @@ public:
   
   ~Token();
 
-  TokenType Type() { return m_type; }
-  std::string Value() { return m_token_value;  }
-  int LineNumber() { return m_line_number;  }
+  TokenType Type() const { return m_type; }
+  std::string Value() const { return m_token_value;  }
+  int LineNumber() const { return m_line_number;  }
 
 private:
   TokenType m_type;

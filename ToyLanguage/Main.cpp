@@ -3,7 +3,7 @@
 #include "Compiler/Lexer.h"
 #include "Compiler/Parser.h"
 #include "Compiler/DataStructures/AbstractSyntaxTreeNode.h"
-
+#include "Compiler/ParseError.h"
 void Traverse(const Ast_Node &node);
 int main()
 {
@@ -63,8 +63,14 @@ int main()
 
 
   }
-  catch (const std::exception &ex)
+  catch (const ParseError &ex)
   {
+    std::cout << "Parse error\n";
+    std::cout << ex.what() << "\n";
+  }
+  catch (const std::logic_error &ex)
+  {
+    std::cout << "Internal error\n";
     std::cout << ex.what() << "\n";
   }
 
@@ -95,6 +101,14 @@ void PrintNodeType(const Ast_Node &node)
   else if (node->Type() == OperationType::ASSIGNMENT)
   {
     std::cout << "Assignment";
+  }
+  else if (node->Type() == OperationType::DIV)
+  {
+    std::cout << "Division";
+  }
+  else if (node->Type() == OperationType::SUB)
+  {
+    std::cout << "Subtraction";
   }
   else if (node->Type() == OperationType::VARIABLE_DECLARATION)
   {

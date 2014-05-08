@@ -1,6 +1,6 @@
 #include "Parser.h"
 #include "ParseError.h"
-
+#include <list>
 Parser::Parser(std::pair<std::vector<std::string>, std::vector<Token>> &tokens) : m_lines(tokens.first), m_tokens(tokens.second), m_current_token(m_tokens.begin())
 {
   token_to_string[TokenType::FUNCTION] = "function declaration";
@@ -100,6 +100,8 @@ void Parser::ParseFunction()
 }
 
 
+
+
 void Parser::ParseVariableList()
 {
   while (true)
@@ -177,9 +179,9 @@ void Parser::ParseVariableDeclaration(Ast_Node parent_node)
   parent_node->AddVariable(v.Name(), v);
   Expect(TokenType::ASSIGNMENT);
 
-  std::shared_ptr<AbstractSyntaxTreeNode> declarationNode(new AbstractSyntaxTreeNode(OperationType::VARIABLE_DECLARATION));
-  std::shared_ptr<AbstractSyntaxTreeNode> assignmentNode(new AbstractSyntaxTreeNode{ OperationType::ASSIGNMENT });
-  std::shared_ptr<AbstractSyntaxTreeNode> child(new AbstractSyntaxTreeNode{ OperationType::VALUE });
+  Ast_Node declarationNode(new AbstractSyntaxTreeNode(OperationType::VARIABLE_DECLARATION));
+  Ast_Node assignmentNode(new AbstractSyntaxTreeNode{ OperationType::ASSIGNMENT });
+  Ast_Node child(new AbstractSyntaxTreeNode{ OperationType::VALUE });
   child->SetValue(v);
   
   assignmentNode->AddChild(child);
@@ -215,35 +217,149 @@ void Parser::ParseStatement()
   Expect(TokenType::SEMICOLON);
 }
 
+#include <iostream>
+// TODO: REFACTOOORRR
+
+void Parser::ParseExpression(Ast_Node parent_node)
+{
+  // shunting yard
+  std::vector<Token> operation_stack;
+  std::list<Token> output_queue;
+  std::unordered_map<TokenType, int> priorities;
+  priorities[TokenType::MULTIPLICATION] = 1;
+  priorities[TokenType::DIVISION] = 1;
+  priorities[TokenType::PLUS] = 0;
+  priorities[TokenType::MINUS] = 0;
+
+  while (m_current_token->Type() != TokenType::SEMICOLON)
+  {
+    if (m_current_token->Type() == TokenType::IDENT || m_current_token->Type() == TokenType::NUMBER)
+    {
+      // TODO: check for function call
+      output_queue.push_back(*m_current_token);
+    }
+    else if (priorities.count(m_current_token->Type()) != 0)
+    {
+      
+      if (operation_stack.size() > 0 && priorities[m_current_token->Type()] <= priorities[operation_stack.back().Type()])
+      {
+        while (operation_stack.size() > 0 && priorities[operation_stack.back().Type()] >= priorities[m_current_token->Type()])
+        {
+          output_queue.push_back(operation_stack.back());
+          operation_stack.pop_back();
+        }
+      }
+      operation_stack.push_back(*m_current_token);
+      
+    }
+    else
+    {
+      InvalidTokenError("Expected value literal, variable, function call or operator");
+    }
+    NextToken();
+  }
+
+  while (operation_stack.size() > 0)
+  {
+    output_queue.push_back(operation_stack.back());
+    operation_stack.pop_back();
+  }
+
+  for (auto o : output_queue)
+  {
+    std::cout << o.Value() << " ";
+  }
+  std::cout << "\n";
+
+  std::vector<Ast_Node> astNodes;
+  while (output_queue.size() > 0)
+  {
+    auto type = output_queue.front().Type();
+    std::cout << "Current token: " << output_queue.front().Value() << "\n";
+    if (type == TokenType::NUMBER)
+    {
+      Ast_Node node(new AbstractSyntaxTreeNode{ OperationType::VALUE });
+      Variable v{ "", output_queue.front().LineNumber() };
+      // assumed int for now
+      v.SetValue(VariableType::INTEGER, std::stoi(output_queue.front().Value()));
+      node->SetValue(v);
+      astNodes.push_back(node);
+    }
+    else if (type == TokenType::IDENT)
+    {
+      if (!parent_node->VariableExists(output_queue.front().Value()))
+      {
+        UndeclaredVariableError();
+      }
+
+      Ast_Node node(new AbstractSyntaxTreeNode{ OperationType::VALUE });
+      node->SetValue(parent_node->GetVariable(output_queue.front().Value()));
+    }
+    else
+    {
+      Ast_Node node;
+      if (astNodes.size() < 2)
+      {
+        InvalidTokenError(output_queue.front(), "Not enough tokens for expression parsing");
+      }
+
+      if (type == TokenType::MULTIPLICATION)
+      {
+        node = Ast_Node(new AbstractSyntaxTreeNode{ OperationType::MUL });
+      }
+      else if (type == TokenType::PLUS)
+      {
+        node = Ast_Node(new AbstractSyntaxTreeNode{ OperationType::ADD });
+      }
+      else if (type == TokenType::MINUS)
+      {
+        node = Ast_Node(new AbstractSyntaxTreeNode{ OperationType::SUB });
+      }
+      else if (type == TokenType::DIVISION)
+      {
+        node = Ast_Node(new AbstractSyntaxTreeNode{ OperationType::DIV });
+      }
+
+
+      auto right = astNodes.back();
+      astNodes.pop_back();
+      auto left = astNodes.back();
+      astNodes.pop_back();
+      
+      node->AddChild(left);
+      node->AddChild(right);
+      astNodes.push_back(node);
+    }
+    output_queue.pop_front();
+  }
+
+  if (astNodes.size() > 1)
+  {
+    throw std::logic_error("AST generation error - unused AST token when parsing expression");
+  }
+  else if (astNodes.size() == 0)
+  {
+    throw std::logic_error("AST generation error - no AST tokens generated when parsing expression");
+  }
+  parent_node->AddChild(astNodes[0]);
+}
+
+
+
+
 void Parser::ParseFunctionCallParameters()
 {
   /*while (true)
   {
-    NextToken();
+  NextToken();
 
-    if (m_current_token->Type() == TokenType::RPAREN)
-    {
-      return;
-    }
-
-    ParseExpression();
-  }*/
-}
-
-void Parser::ParseExpression(Ast_Node parent_node)
-{
-  Ast_Node node, root;
-
-  bool expectOperator = false;
-  // todo - add operator presedence code 
-  while (m_current_token->Type() != TokenType::SEMICOLON)
+  if (m_current_token->Type() == TokenType::RPAREN)
   {
-  
-    
-    NextToken();
+  return;
   }
 
-  return parent_node->AddChild(root);
+  ParseExpression();
+  }*/
 }
 
 void Parser::NextToken()
@@ -299,16 +415,20 @@ void Parser::ExpectNonVoidType()
   }
 }
 
+void Parser::InvalidTokenError(const Token &token, std::string expected)
+{
+  throw ParseError("Unexpected token " + GetTokenErrorInfo(token) + expected);
+}
 
 void Parser::InvalidTokenError(std::string expected)
 {
-  throw ParseError("Unexpected token " + GetTokenErrorInfo() + expected);
+  InvalidTokenError(*m_current_token, expected);
 }
 
-std::string Parser::GetTokenErrorInfo()
+std::string Parser::GetTokenErrorInfo( const Token &token )
 {
-  int line_number = m_current_token->LineNumber();
-  return "'" + m_current_token->Value() + "' at line " + std::to_string(line_number) + "\n\n---> "
+  int line_number = token.LineNumber();
+  return "'" + token.Value() + "' at line " + std::to_string(line_number) + "\n\n---> "
     + m_lines[line_number - 1] + "\n\n";
 }
 
@@ -317,7 +437,7 @@ void Parser::FunctionRedeclarationError()
 
   int declaration_line = m_functions[m_current_token->Value()].DeclarationLine();
   throw ParseError(
-    "Redefinition of function " + GetTokenErrorInfo() +
+    "Redefinition of function " + GetTokenErrorInfo(*m_current_token) +
     "Previous declaration at line " + std::to_string(declaration_line) + "\n\n---> " + m_lines[declaration_line - 1]);
 }
 
@@ -325,11 +445,11 @@ void Parser::VariableRedeclarationError()
 {
   int declaration_line = m_root_node->GetVariable(m_current_token->Value()).DeclarationLine();
   throw ParseError(
-    "Redefinition of variable " + GetTokenErrorInfo() +
+    "Redefinition of variable " + GetTokenErrorInfo(*m_current_token) +
     "Previous declaration at line " + std::to_string(declaration_line) + "\n\n---> " + m_lines[declaration_line - 1] + "\n");
 }
 
 void Parser::UndeclaredVariableError()
 {
-  throw ParseError("Identifier " + GetTokenErrorInfo() + "has not been declared");
+  throw ParseError("Identifier " + GetTokenErrorInfo(*m_current_token) + "has not been declared");
 }

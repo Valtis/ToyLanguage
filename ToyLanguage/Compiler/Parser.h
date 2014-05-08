@@ -35,10 +35,11 @@ private:;
 
 
   void InvalidTokenError(std::string expected);
+  void InvalidTokenError(const Token &token, std::string expected);
   void FunctionRedeclarationError();
   void VariableRedeclarationError();
   void UndeclaredVariableError();
-  std::string GetTokenErrorInfo();
+  std::string GetTokenErrorInfo(const Token &token);
 
   std::vector<std::string> m_lines;
   std::vector<Token> m_tokens;
