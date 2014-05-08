@@ -1,8 +1,8 @@
 #include <fstream>
 #include <iostream>
-#include "Lexer.h"
-#include "Parser.h"
-#include "AbstractSyntaxTreeNode.h"
+#include "Compiler/Lexer.h"
+#include "Compiler/Parser.h"
+#include "Compiler/DataStructures/AbstractSyntaxTreeNode.h"
 
 void Traverse(const Ast_Node &node);
 int main()
