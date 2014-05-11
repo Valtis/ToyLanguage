@@ -79,11 +79,6 @@ void Parser::ParseFunction()
 
   Expect(TokenType::LPAREN);
 
-  if (PeekNextToken().Type() == TokenType::VARIABLE)
-  {
-    ParseVariableList();
-  }
-
   Expect(TokenType::RPAREN);
   Expect(TokenType::COLON);
 
@@ -91,34 +86,9 @@ void Parser::ParseFunction()
 
 
   ParseBlock(m_root_node);
-
-
-/*  while (m_current_node->Parent() != nullptr)
-  {
-    m_current_node = m_current_node->Parent();
-  }*/
   
   function.SetRootNode(m_root_node);
   m_functions[function.Name()] = function;
-}
-
-
-
-
-void Parser::ParseVariableList()
-{
-  while (true)
-  {
-    Expect(TokenType::VARIABLE);
-    Expect(TokenType::IDENT);
-    Expect(TokenType::COLON);
-    ExpectNonVoidType();
-    if (PeekNextToken().Type() != TokenType::COMMA)
-      break;
-    NextToken();
-
-  }
-
 }
 
 void Parser::ParseBlock(Ast_Node parent_node)
@@ -199,28 +169,6 @@ void Parser::ParseVariableDeclaration(Ast_Node parent_node)
 }
 
 
-void Parser::ParseStatement() 
-{
-  Expect(TokenType::IDENT);
-  
-  NextToken();
-  switch (m_current_token->Type())
-  {
-  case TokenType::LPAREN:
-    ParseFunctionCallParameters();
-    break;
-  case TokenType::ASSIGNMENT:
-    break;
-  case TokenType::PLUS:
-    break;
-  case TokenType::SEMICOLON:
-    return;
-  default:
-    InvalidTokenError("Expected expression");
-  }
-
-  Expect(TokenType::SEMICOLON);
-}
 
 void Parser::ParseExpression(Ast_Node parent_node)
 {
@@ -261,23 +209,6 @@ bool Parser::IsOperator(TokenType type)
 {
   return type == TokenType::MULTIPLICATION || type == TokenType::DIVISION || type == TokenType::PLUS || type == TokenType::MINUS || type == TokenType::ASSIGNMENT
     || type != TokenType::LPAREN || type != TokenType::RPAREN;
-}
-
-
-
-void Parser::ParseFunctionCallParameters()
-{
-  /*while (true)
-  {
-  NextToken();
-
-  if (m_current_token->Type() == TokenType::RPAREN)
-  {
-  return;
-  }
-
-  ParseExpression();
-  }*/
 }
 
 void Parser::NextToken()

@@ -18,15 +18,10 @@ private:;
   void NextToken();
   Token PeekNextToken();
   
-
   void ParseFunction();
-  void ParseVariableList();
   void ParseBlock(Ast_Node parent_node);
-  void ParseStatement();
-
   void ParseVariableDeclaration(Ast_Node parent_node);
   void ParseExpression(Ast_Node parent_node);
-  void ParseFunctionCallParameters();
   
 
   void Expect(TokenType type);
