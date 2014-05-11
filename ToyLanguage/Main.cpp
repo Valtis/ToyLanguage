@@ -1,9 +1,9 @@
 #include <fstream>
 #include <iostream>
 #include "Compiler/Lexer.h"
-#include "Compiler/Parser.h"
+#include "Compiler/Parser/Parser.h"
 #include "Compiler/DataStructures/AbstractSyntaxTreeNode.h"
-#include "Compiler/ParseError.h"
+#include "Compiler/Parser/ParseError.h"
 void Traverse(const Ast_Node &node);
 int main()
 {
@@ -79,48 +79,50 @@ int main()
 
 }
 
-void PrintNodeType(const Ast_Node &node)
+void PrintNode(const Ast_Node &node)
 {
   if (node == nullptr)
   {
     std::cout << "Null children (should not happen)\n";
     return;
   }
+
+
   if (node->Type() == OperationType::BLOCK)
   {
-    std::cout << "Block";
+   // std::cout << "Block";
   }
   else if (node->Type() == OperationType::ADD)
   {
-    std::cout << "Add";
+    std::cout << "ADD";
   }
   else if (node->Type() == OperationType::MUL)
   {
-    std::cout << "Multiply";
+    std::cout << "MUL";
   }
   else if (node->Type() == OperationType::ASSIGNMENT)
   {
-    std::cout << "Assignment";
+   std::cout << "ASSIGN";
   }
   else if (node->Type() == OperationType::DIV)
   {
-    std::cout << "Division";
+    std::cout << "DIV";
   }
   else if (node->Type() == OperationType::SUB)
   {
-    std::cout << "Subtraction";
+    std::cout << "SUB";
   }
   else if (node->Type() == OperationType::VARIABLE_DECLARATION)
   {
-    std::cout << "Variable declaration";
+  //  std::cout << "Variable declaration";
   }
   else if (node->Type() == OperationType::VARIABLE)
   {
-    std::cout << "Variable";
+    std::cout << "PUSH " << node->Value().Name();// << node->Value().Value().value.integer_value;
   }
   else if (node->Type() == OperationType::CONSTANT)
   {
-    std::cout << "Constant";
+    std::cout << "PUSH " << node->Value().Value().value.integer_value;
   }
 
   std::cout << "\n";
@@ -128,37 +130,11 @@ void PrintNodeType(const Ast_Node &node)
 
 void Traverse(const Ast_Node &node)
 {
-
-  std::cout << "\n\n\nEntered node of type: ";
-  PrintNodeType(node);
-  if (node == nullptr)
-  {
-    return;
-  }
-
-//  enum class OperationType { BLOCK, FUNCTION_CALL, ADD, SUB, MUL, DIV, ASSIGNMENT, VARIABLE_DECLARATION, VALUE };
   auto children = node->Children();
-  std::cout << "\n";
-  if (children.size() == 0)
-  {
-    std::cout << "Node has no children\n";
-    std::cout << "Name: " << node->Value().Name() << "  Value: " << node->Value().Value().value.integer_value << "\n";
-  }
 
-  int i = 0;
-  std::cout << "Node has children \n";
   for (auto child : children)
   {
-    std::cout << ++i << ": ";
-    PrintNodeType(child);
-  }
-
-  i = 0;
-  for (auto child : children)
-  {
-    std::cout << "Entering children number: " << ++i  << "\n";
     Traverse(child);
   }
-
-
+  PrintNode(node);
 }

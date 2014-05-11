@@ -2,8 +2,9 @@
 #include <string>
 
 enum class VariableType { NONE, INTEGER, LONG, STRING, FLOAT, DOUBLE, BOOLEAN };
+// todo: Move
 
-struct VariableValue
+struct VMVariable
 {
   VariableType type;
   union 
@@ -65,13 +66,13 @@ public:
     strncpy(m_value.value.string_value.str, value.c_str(), value.length() + 1);
   }
 
-  VariableValue Value()
+  VMVariable Value()
   {
     return m_value;
   }
 
 private:
   int m_declaration_line;
-  VariableValue m_value;
+  VMVariable m_value;
   std::string m_name;
 };
