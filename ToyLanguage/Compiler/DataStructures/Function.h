@@ -11,12 +11,14 @@ public:
 
   void SetRootNode(std::shared_ptr<AbstractSyntaxTreeNode> node);
   std::shared_ptr<AbstractSyntaxTreeNode> RootNode() { return m_root_node; }
-  std::string Name() { return m_name;  }
-  int DeclarationLine() { return m_declaration_line;  }
+  std::string Name() const { return m_name;  }
+  int DeclarationLine() const { return m_declaration_line;  }
+  int ParameterCount() const { return m_parameters.size();  }
 
 private:
   int m_declaration_line;
   std::string m_name;
   Ast_Node m_root_node;
+  std::vector<VariableType> m_parameters;
 };
 

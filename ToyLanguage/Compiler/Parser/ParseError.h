@@ -66,3 +66,16 @@ private:
   int m_line;
 
 };
+
+class VariableShadowsFunctionError : public ParseError
+{
+public:
+  VariableShadowsFunctionError(std::string what) : ParseError(what.c_str())
+  {
+
+  }
+
+private:
+  int m_line;
+
+};

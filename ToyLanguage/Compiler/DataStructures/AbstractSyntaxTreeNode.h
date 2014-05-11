@@ -66,10 +66,11 @@ public:
 
 private:
   OperationType m_type;
-  Variable m_value; // ignored unless operation_type is value; value for root node. Used as leaf value when constructing byte code from ast
+  Variable m_value; // ignored unless operation_type is value
   
   AbstractSyntaxTreeNode *m_parent;
   std::vector<Ast_Node> m_children;
-  std::unordered_map<std::string, Variable> m_visible_variables;
+
+  std::unordered_map<std::string, Variable> m_visible_variables; // variables that can be seen from this node
 };
 

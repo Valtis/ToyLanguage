@@ -1,10 +1,12 @@
 #pragma once
+#include <unordered_map>
 #include "../DataStructures/Token.h"
 #include "../DataStructures/AbstractSyntaxTreeNode.h"
+#include "../DataStructures/Function.h"
 class ShuntingYard
 {
 public:
-  ShuntingYard();
+  ShuntingYard(std::unordered_map<std::string, Function> declared_functions);
   ~ShuntingYard();
 
   Ast_Node CreateAst(std::vector<Token> tokens, Ast_Node parent_node);
@@ -28,7 +30,8 @@ private:
  
 
   Variable GetVariable();
-
+  bool IsFunction(Token token);
+  void AddFunctionCall(std::vector<Ast_Node> &astNodes);
   enum class Associativeness { LEFT, RIGHT };
   std::unordered_map<TokenType, int> m_priorities;
   std::unordered_map<TokenType, OperationType> m_token_to_operation;
@@ -36,5 +39,6 @@ private:
   
   std::vector<Token> m_operation_stack;
   std::list<Token> m_output_queue;
+  std::unordered_map<std::string, Function> m_declared_functions;
 };
 

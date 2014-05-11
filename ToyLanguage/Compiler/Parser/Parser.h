@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <functional>
 #include <unordered_map>
 #include "../DataStructures/Function.h"
 #include "../DataStructures/Token.h"
@@ -39,10 +40,12 @@ private:;
   void RaiseUndeclaredVariableError(Token token);
   void RaiseMissingParenthesisError(Token token);
   void RaiseMissingOperandError(Token Token);
+  void RaiseVariableShadowsFunctionError(std::string variable_name, int line);
 
   std::string GetLineInfo(int token_line);
   std::string GetTokenErrorInfo(const Token &token);
-
+  void CheckForIdentifersShadowingFunctions();
+  void TraverseTreePreOrder(const Ast_Node &node, std::function<void(Ast_Node)> operation);
   std::vector<std::string> m_lines;
   std::vector<Token> m_tokens;
   std::vector<Token>::iterator m_current_token;

@@ -58,10 +58,13 @@ int main()
   try
   {
     auto functions = parser.Parse();
+    std::cout << "function() ast\n";
     auto root = functions["function"].RootNode();
     Traverse(root);
 
-
+    std::cout << "Main() ast\n";
+    root = functions["main"].RootNode();
+    Traverse(root);
   }
   catch (const ParseError &ex)
   {
@@ -90,7 +93,7 @@ void PrintNode(const Ast_Node &node)
 
   if (node->Type() == OperationType::BLOCK)
   {
-   // std::cout << "Block";
+    // std::cout << "Block";
   }
   else if (node->Type() == OperationType::ADD)
   {
@@ -102,7 +105,7 @@ void PrintNode(const Ast_Node &node)
   }
   else if (node->Type() == OperationType::ASSIGNMENT)
   {
-   std::cout << "ASSIGN";
+    std::cout << "ASSIGN";
   }
   else if (node->Type() == OperationType::DIV)
   {
@@ -114,7 +117,7 @@ void PrintNode(const Ast_Node &node)
   }
   else if (node->Type() == OperationType::VARIABLE_DECLARATION)
   {
-  //  std::cout << "Variable declaration";
+    //  std::cout << "Variable declaration";
   }
   else if (node->Type() == OperationType::VARIABLE)
   {
@@ -122,7 +125,26 @@ void PrintNode(const Ast_Node &node)
   }
   else if (node->Type() == OperationType::CONSTANT)
   {
-    std::cout << "PUSH " << node->Value().Value().value.integer_value;
+    std::cout << "PUSH ";
+    switch (node->Value().VariableData().type)
+    {
+    case VariableType::INTEGER:
+      std::cout << node->Value().VariableData().value.integer_value;
+      break;
+    case VariableType::STRING:
+      for (int i = 0; i < node->Value().VariableData().value.string_value.length; ++i)
+      {
+        std::cout << "STRING!";
+      }
+      break;
+    default:
+      break;
+
+    }
+  }
+  else if (node->Type() == OperationType::FUNCTION_CALL)
+  {
+    std::cout << "CALL " << node->Value().Name();
   }
 
   std::cout << "\n";

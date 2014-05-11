@@ -1,9 +1,8 @@
 #include "ShuntingYard.h"
 #include "ShuntingYardError.h"
-
-ShuntingYard::ShuntingYard()
+#include <algorithm>
+ShuntingYard::ShuntingYard(std::unordered_map<std::string, Function> declared_functions) : m_declared_functions(declared_functions)
 {
-
   // TODO: clean up
   m_priorities[TokenType::MULTIPLICATION] = 2;
   m_priorities[TokenType::DIVISION] = 2;
@@ -22,9 +21,6 @@ ShuntingYard::ShuntingYard()
   m_token_associativeness[TokenType::PLUS] = Associativeness::LEFT;
   m_token_associativeness[TokenType::MINUS] = Associativeness::LEFT;
   m_token_associativeness[TokenType::ASSIGNMENT] = Associativeness::RIGHT;
-
-
-
 }
 
 
@@ -51,7 +47,14 @@ void ShuntingYard::ToReversePolish(std::vector<Token> tokens)
   {
     if (token.Type() == TokenType::IDENT || token.Type() == TokenType::NUMBER)
     {
-      m_output_queue.push_back(token);
+      if (IsFunction(token))
+      {
+        m_operation_stack.push_back(token);
+      }
+      else 
+      {
+        m_output_queue.push_back(token);
+      }
     }
     else if (token.Type() == TokenType::LPAREN)
     {
@@ -127,12 +130,17 @@ Ast_Node ShuntingYard::CreateAstFromReversePolish(Ast_Node parent_node)
     if (type == TokenType::NUMBER)
     {
       AddNumberNode(astNodes);
-
     }
     else if (type == TokenType::IDENT)
     {
-      AddVariableNode(astNodes, parent_node);
-
+      if (IsFunction(m_output_queue.front()))
+      {
+        AddFunctionCall(astNodes);
+      }
+      else
+      {
+        AddVariableNode(astNodes, parent_node);
+      }
     }
     else
     {
@@ -162,10 +170,11 @@ Variable ShuntingYard::GetVariable()
 
 void ShuntingYard::AddNumberNode(std::vector<Ast_Node> &astNodes)
 {
-  Ast_Node node(new AbstractSyntaxTreeNode{ OperationType::CONSTANT });
+  Ast_Node node{ new AbstractSyntaxTreeNode{ OperationType::CONSTANT }};
   node->SetValue(GetVariable());
   astNodes.push_back(node);
 }
+
 
 void ShuntingYard::AddVariableNode(std::vector<Ast_Node> &astNodes, Ast_Node parent_node)
 {
@@ -174,10 +183,23 @@ void ShuntingYard::AddVariableNode(std::vector<Ast_Node> &astNodes, Ast_Node par
     throw ShuntingYardUndeclaredVariableError(m_output_queue.front());
   }
 
-  Ast_Node node(new AbstractSyntaxTreeNode{ OperationType::VARIABLE });
+  Ast_Node node{ new AbstractSyntaxTreeNode{ OperationType::VARIABLE } };
   node->SetValue(parent_node->GetVariable(m_output_queue.front().Value()));
   astNodes.push_back(node);
 }
+
+void ShuntingYard::AddFunctionCall(std::vector<Ast_Node> &astNodes)
+{
+  Ast_Node node{ new AbstractSyntaxTreeNode{ OperationType::FUNCTION_CALL } };
+  auto token = m_output_queue.front();
+  
+  Variable v(token.Value(), token.LineNumber());
+
+  node->SetValue(v);
+
+  astNodes.push_back(node);
+}
+
 
 void ShuntingYard::AddOperatorNode(std::vector<Ast_Node> &astNodes, Token token)
 {
@@ -187,7 +209,7 @@ void ShuntingYard::AddOperatorNode(std::vector<Ast_Node> &astNodes, Token token)
     throw ShuntingYardMissingOperandError(token);
   }
 
-  node = Ast_Node(new AbstractSyntaxTreeNode{ m_token_to_operation[token.Type()] });
+  node = Ast_Node{ new AbstractSyntaxTreeNode{ m_token_to_operation[token.Type()] } };
 
   auto right = astNodes.back();
   astNodes.pop_back();
@@ -197,5 +219,11 @@ void ShuntingYard::AddOperatorNode(std::vector<Ast_Node> &astNodes, Token token)
   node->AddChild(left);
   node->AddChild(right);
   astNodes.push_back(node);
+}
+
+
+bool ShuntingYard::IsFunction(Token token)
+{
+  return m_declared_functions.count(token.Value()) != 0;
 }
 

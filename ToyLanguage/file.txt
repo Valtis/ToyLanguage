@@ -2,10 +2,15 @@ fn function():void {
   var a:int = 2*3 +4;
   var b:int = 2*(3+4);
   var c:int = ((3 + 4) * (4+5))*3 + 4;
-  var d:int = 3; 
+  var d:int = 3;
 }
 
 fn main():void 
 {
-  function(); 
+  var a:int = 4 + function();
+}
+
+
+fn a():void
+{
 }
