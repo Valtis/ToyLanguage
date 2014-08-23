@@ -13,39 +13,18 @@ public:
   ~Parser();
 
   std::unordered_map<std::string, Function>  Parse();
-private:;
+private:
 
   bool HasTokens();
   void NextToken();
   Token PeekNextToken();
   
-  void ParseFunction();
-  void ParseBlock(Ast_Node parent_node);
-  void ParseVariableDeclaration(Ast_Node parent_node);
-  void ParseExpression(Ast_Node parent_node);
-  
-
   void Expect(TokenType type);
   void ExpectType();
   void ExpectNonVoidType();
 
-  bool IsOperator(TokenType type);
-
-
-  // TODO: Extract to separate class
-  void InvalidTokenError(std::string expected);
-  void InvalidTokenError(const Token &token, std::string expected);
-  void RaiseFunctionRedeclarationError();
-  void RaiseVariableRedeclarationError(int previousLine);
-  void RaiseUndeclaredVariableError(Token token);
-  void RaiseMissingParenthesisError(Token token);
-  void RaiseMissingOperandError(Token Token);
-  void RaiseVariableShadowsFunctionError(std::string variable_name, int line);
-
-  std::string GetLineInfo(int token_line);
-  std::string GetTokenErrorInfo(const Token &token);
-  void CheckForIdentifersShadowingFunctions();
-  void TraverseTreePreOrder(const Ast_Node &node, std::function<void(Ast_Node)> operation);
+  void ParseFunctionDeclaration();
+  void ParseFunctionArguments(Function &f);
   std::vector<std::string> m_lines;
   std::vector<Token> m_tokens;
   std::vector<Token>::iterator m_current_token;

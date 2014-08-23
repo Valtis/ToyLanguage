@@ -16,7 +16,7 @@ Function::~Function()
 {
 }
 
-void Function::SetRootNode(std::shared_ptr<AbstractSyntaxTreeNode> node)
+void Function::SetRootNode(std::shared_ptr<AstNode> node)
 {
   m_root_node = node;
 }

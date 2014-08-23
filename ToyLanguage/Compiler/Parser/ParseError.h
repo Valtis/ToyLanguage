@@ -6,7 +6,7 @@ class ParseError : public std::runtime_error
 {
 public:
 
-  ParseError(std::string what) : std::runtime_error(what.c_str())
+  ParseError(const std::string &what, int line_number) : std::runtime_error(what.c_str()), m_line_number(line_number)
   {
 
   }
@@ -15,67 +15,27 @@ public:
   {
 
   }
-  
-};
 
-class UndeclaredVariableError : public ParseError
-{
-public:
-  UndeclaredVariableError(std::string what) : ParseError(what.c_str())
+  int LineNumber() const 
   {
-
+    return m_line_number;
   }
 
 private:
-  Token m_token;
-};
-
-class VariableRedeclarationError : public ParseError
-{
-public:
-  VariableRedeclarationError(std::string what) : ParseError(what.c_str())
-  {
-
-  }
+  int m_line_number;
 };
 
 
-
-class MissingParenthesisError : public ParseError
-{
-public:
-  MissingParenthesisError(std::string what) : ParseError(what.c_str())
-  {
-
-  }
-
-private:
-  int m_line;
-
-}; 
-
-class MissingOperandError : public ParseError
-{
-public:
-  MissingOperandError(std::string what) : ParseError(what.c_str())
-  {
-
-  }
-
-private:
-  int m_line;
-
+#define PARSE_ERROR(NAME__) class NAME__ : public ParseError  \
+ { \
+  public: \
+   NAME__(const std::string &what, int line_number) : ParseError(what.c_str(), line_number) {} \
 };
 
-class VariableShadowsFunctionError : public ParseError
-{
-public:
-  VariableShadowsFunctionError(std::string what) : ParseError(what.c_str())
-  {
 
-  }
 
-private:
-  int m_line;
+PARSE_ERROR(UnexpectedTokenError)
 
-};
+PARSE_ERROR(UnexpectedEOFError)
+
+

@@ -4,19 +4,19 @@
 #include <memory>
 #include "OperationType.h"
 #include "Variable.h"
-class AbstractSyntaxTreeNode;
+class AstNode;
 
-typedef std::shared_ptr < AbstractSyntaxTreeNode > Ast_Node;
+typedef std::shared_ptr < AstNode > Ast_Node;
 
-class AbstractSyntaxTreeNode
+class AstNode
 {
 public:
-  AbstractSyntaxTreeNode();
-  AbstractSyntaxTreeNode(OperationType type);
+  AstNode();
+  AstNode(OperationType type);
 
 
-  ~AbstractSyntaxTreeNode();
-
+  ~AstNode();
+    
   void AddChild(Ast_Node node)
   {
     node->m_parent = this;
@@ -36,7 +36,7 @@ public:
     
   }
 
-  AbstractSyntaxTreeNode *Parent()
+  AstNode *Parent()
   {
     return m_parent;
   }
@@ -56,21 +56,11 @@ public:
     return m_type;
   }
 
-  bool VariableExists(std::string name);
-
-  void AddVariable(std::string name, Variable variable);
-  Variable GetVariable(std::string name);
-  
-  void SetValue(Variable value) { m_value = value;  }
-  Variable Value() { return m_value;  }
-
 private:
   OperationType m_type;
-  Variable m_value; // ignored unless operation_type is value
-  
-  AbstractSyntaxTreeNode *m_parent;
+
+  AstNode *m_parent;
   std::vector<Ast_Node> m_children;
 
-  std::unordered_map<std::string, Variable> m_visible_variables; // variables that can be seen from this node
 };
 

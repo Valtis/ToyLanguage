@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <memory>
-#include "AbstractSyntaxTreeNode.h"
+#include "AstNode.h"
 class Function
 {
 public:
@@ -9,8 +9,8 @@ public:
   Function(std::string name, int declaration_line);
   ~Function();
 
-  void SetRootNode(std::shared_ptr<AbstractSyntaxTreeNode> node);
-  std::shared_ptr<AbstractSyntaxTreeNode> RootNode() { return m_root_node; }
+  void SetRootNode(std::shared_ptr<AstNode> node);
+  std::shared_ptr<AstNode> RootNode() { return m_root_node; }
   std::string Name() const { return m_name;  }
   int DeclarationLine() const { return m_declaration_line;  }
   int ParameterCount() const { return m_parameters.size();  }

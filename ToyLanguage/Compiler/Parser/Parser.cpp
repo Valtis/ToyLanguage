@@ -2,8 +2,6 @@
 #include "ParseError.h"
 #include <list>
 #include <algorithm>
-#include "ShuntingYard.h"
-#include "ShuntingYardError.h"
 
 
 Parser::Parser(std::pair<std::vector<std::string>, std::vector<Token>> &tokens) : m_lines(tokens.first), m_tokens(tokens.second), m_current_token(m_tokens.begin())
@@ -40,22 +38,7 @@ std::unordered_map<std::string, Function> Parser::Parse()
 {
   while (true)
   {
-    switch (m_current_token->Type())
-    {
-    case TokenType::FUNCTION:
-      ParseFunction();
-      break;
-    default:
-      InvalidTokenError("Expected function declaration");
-    }
-    if (HasTokens())
-    {
-      NextToken();
-    }
-    else
-    {
-      break;
-    }
+    ParseFunctionDeclaration();
   }
 
 
@@ -70,159 +53,30 @@ std::unordered_map<std::string, Function> Parser::Parse()
 
 }
 
-void Parser::ParseFunction()
+void Parser::ParseFunctionDeclaration()
 {
-  Expect(TokenType::IDENT);
-
-  if (m_functions.count(m_current_token->Value()) != 0)
-  {
-    RaiseFunctionRedeclarationError();
-  }
-
-  Function function(m_current_token->Value(), m_current_token->LineNumber());
-  m_root_node = Ast_Node{ new AbstractSyntaxTreeNode };
-
+  Function f;
   Expect(TokenType::LPAREN);
+  Expect(TokenType::FUNCTION);
+  ParseFunctionArguments(f);
+  
+}
 
+void Parser::ParseFunctionArguments(Function &f)
+{
+  Expect(TokenType::LPAREN);
   Expect(TokenType::RPAREN);
-  Expect(TokenType::COLON);
-
-  ExpectType();
-
-
-  ParseBlock(m_root_node);
-
-  function.SetRootNode(m_root_node);
-  m_functions[function.Name()] = function;
-}
-
-void Parser::ParseBlock(Ast_Node parent_node)
-{
-
-  Expect(TokenType::LBRACE);
-
-  Ast_Node node{ new AbstractSyntaxTreeNode{} };
-  NextToken();
-  while (m_current_token->Type() != TokenType::RBRACE)
-  {
-
-    switch (m_current_token->Type())
-    {
-    case TokenType::VARIABLE:
-      ParseVariableDeclaration(node);
-      break;
-    case TokenType::IDENT:
-      ParseExpression(node);
-
-      break;
-    case TokenType::WHILE:
-      break;
-    case TokenType::IF:
-      break;
-    default:
-      InvalidTokenError("Expected variable declaration, identifier or statement");
-    }
-    NextToken();
-  }
-
-  parent_node->AddChild(node);
-
-}
-
-void Parser::ParseVariableDeclaration(Ast_Node parent_node)
-{
-  Expect(TokenType::IDENT);
-
-  if (parent_node->VariableExists(m_current_token->Value()))
-  {
-    RaiseVariableRedeclarationError(parent_node->GetVariable(m_current_token->Value()).DeclarationLine());
-  }
-
-  Variable v{ m_current_token->Value(), m_current_token->LineNumber() };
-
-
-  Expect(TokenType::COLON);
-  ExpectNonVoidType();
-
-  switch (m_current_token->Type())
-  {
-  case TokenType::INT_TOKEN:
-    v.SetValue(VariableType::INTEGER, 0);
-    break;
-  default:
-    throw std::logic_error("Internal error - variable token provided by lexer has invalid type");
-  }
-
-  parent_node->AddVariable(v.Name(), v);
-  Expect(TokenType::ASSIGNMENT);
-
-  Ast_Node declarationNode(new AbstractSyntaxTreeNode(OperationType::VARIABLE_DECLARATION));
-  Ast_Node assignmentNode(new AbstractSyntaxTreeNode{ OperationType::ASSIGNMENT });
-  Ast_Node child(new AbstractSyntaxTreeNode{ OperationType::VARIABLE });
-  child->SetValue(v);
-
-  assignmentNode->AddChild(child);
-
-
-  declarationNode->AddChild(assignmentNode);
-
-  // check that assignment is allowed (for example int <--- str raises error)
-  parent_node->AddChild(declarationNode);
-  NextToken();
-  ParseExpression(assignmentNode);
-
 }
 
 
 
-void Parser::ParseExpression(Ast_Node parent_node)
-{
-  std::vector<Token> tokens;
-  while (m_current_token->Type() != TokenType::SEMICOLON)
-  {
-    auto type = m_current_token->Type();
-    if (type != TokenType::IDENT && type != TokenType::NUMBER && !IsOperator(type))
-    {
-      InvalidTokenError("Expected value literal, variable, function call or operator");
-    }
-
-    tokens.push_back(*m_current_token);
-    NextToken();
-  }
-
-
-  ShuntingYard yard(m_functions);
-  try
-  {
-    parent_node->AddChild(yard.CreateAst(tokens, parent_node));
-  }
-  catch (const ShuntingYardUndeclaredVariableError &ex)
-  {
-    RaiseUndeclaredVariableError(ex.GetToken());
-  }
-  catch (const ShuntingYardMissingParenthesisError &ex)
-  {
-    RaiseMissingParenthesisError(ex.GetToken());
-  }
-  catch (const ShuntingYardMissingOperandError &ex)
-  {
-    RaiseMissingOperandError(ex.GetToken());
-  }
-}
-
-
-bool Parser::IsOperator(TokenType type)
-{
-  return type == TokenType::MULTIPLICATION || type == TokenType::DIVISION || type == TokenType::PLUS || type == TokenType::MINUS || type == TokenType::ASSIGNMENT
-    || type != TokenType::LPAREN || type != TokenType::RPAREN;
-}
 
 void Parser::NextToken()
 {
   ++m_current_token;
   if (m_current_token == m_tokens.end())
   {
-    throw ParseError("Unexpected end of file");
+    throw UnexpectedEOFError("Unexpected end of file", m_tokens.back().LineNumber() + 1);
   }
 }
 
@@ -230,7 +84,7 @@ Token Parser::PeekNextToken()
 {
   if (m_current_token + 1 == m_tokens.end())
   {
-    throw ParseError("Unexpected end of file");
+    throw UnexpectedEOFError("Unexpected end of file", m_tokens.back().LineNumber() + 1);
   }
   return *(m_current_token + 1);
 }
@@ -246,123 +100,7 @@ void Parser::Expect(TokenType type)
   NextToken();
   if (m_current_token->Type() != type)
   {
-    InvalidTokenError("Expected '" + token_to_string[type] + "'\n");
+    throw UnexpectedTokenError("Expected '" + token_to_string[type] + "', actual '" +  token_to_string[m_current_token->Type()] + "'", m_current_token->LineNumber());
   }
 }
 
-void Parser::ExpectType()
-{
-  NextToken();
-  auto type = m_current_token->Type();
-  if (type != TokenType::VOID_TOKEN && type != TokenType::INT_TOKEN)
-  {
-    InvalidTokenError("Expected value type");
-  }
-}
-
-void Parser::ExpectNonVoidType()
-{
-  NextToken();
-  auto type = m_current_token->Type();
-  if (type != TokenType::INT_TOKEN)
-  {
-    InvalidTokenError("Expected non-void value type");
-  }
-}
-
-
-
-void Parser::InvalidTokenError(const Token &token, std::string expected)
-{
-  throw ParseError("Unexpected token " + GetTokenErrorInfo(token) + expected);
-}
-
-void Parser::InvalidTokenError(std::string expected)
-{
-  InvalidTokenError(*m_current_token, expected);
-}
-
-std::string Parser::GetTokenErrorInfo(const Token &token)
-{
-  int line_number = token.LineNumber();
-  return "'" + token.Value() + "' " + GetLineInfo(line_number) + "\n\n";
-}
-
-std::string Parser::GetLineInfo(int token_line)
-{
-  return "at line " + std::to_string(token_line) + "\n\n---> "
-    + m_lines[token_line - 1];
-}
-
-
-void Parser::RaiseFunctionRedeclarationError()
-{
-
-  int declaration_line = m_functions[m_current_token->Value()].DeclarationLine();
-  throw ParseError(
-    "Redefinition of function " + GetTokenErrorInfo(*m_current_token) +
-    "Previous declaration " + GetLineInfo(declaration_line));
-}
-
-void Parser::RaiseVariableRedeclarationError(int initial_declaration)
-{
-
-  throw UndeclaredVariableError(
-    "Redefinition of variable " + GetTokenErrorInfo(*m_current_token) +
-    "Previous declaration " + GetLineInfo(initial_declaration) + "\n");
-}
-
-void Parser::RaiseUndeclaredVariableError(Token token)
-{
-  throw UndeclaredVariableError("Identifier " + GetTokenErrorInfo(token) + "has not been declared");
-}
-
-
-void Parser::RaiseMissingParenthesisError(Token token)
-{
-  throw MissingParenthesisError("Mismatched parenthesis " + GetTokenErrorInfo(token));
-}
-
-void Parser::RaiseMissingOperandError(Token token)
-{
-  throw MissingOperandError("Missing operand " + GetLineInfo(token.LineNumber()));
-}
-
-void Parser::RaiseVariableShadowsFunctionError(std::string name, int line)
-{
-  throw VariableShadowsFunctionError("Variable " + name + " " + GetLineInfo(line) + "\n\nshadows function with same name " + GetLineInfo(m_functions[name].DeclarationLine()));
-
-}
-
-void Parser::CheckForIdentifersShadowingFunctions()
-{
-  for (auto name_func_pair : m_functions)
-  {
-
-    TraverseTreePreOrder(name_func_pair.second.RootNode(), [&](const Ast_Node &node) {
-      if (node->Children().size() > 0 && node->Type() == OperationType::ASSIGNMENT)
-      {
-        if (m_functions.count(node->Children()[0]->Value().Name()) != 0)
-        {
-          RaiseVariableShadowsFunctionError(node->Children()[0]->Value().Name(), node->Children()[0]->Value().DeclarationLine());
-        }
-      }
-    }
-    );
-
-  }
-}
-
-void Parser::TraverseTreePreOrder(const Ast_Node &node, std::function<void(Ast_Node)> operation)
-{
-  if (node == nullptr)
-  {
-    return;
-  }
-
-  operation(node);
-  for (auto child : node->Children())
-  {
-    TraverseTreePreOrder(child, operation);
-  }
-}
