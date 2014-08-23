@@ -11,11 +11,6 @@ public:
 
   }
 
-  ParseError(const char *what) : std::runtime_error(what)
-  {
-
-  }
-
   int LineNumber() const 
   {
     return m_line_number;
@@ -37,5 +32,7 @@ private:
 PARSE_ERROR(UnexpectedTokenError)
 
 PARSE_ERROR(UnexpectedEOFError)
+PARSE_ERROR(UndefinedMainError)
+PARSE_ERROR(FunctionRedeclarationError)
 
 

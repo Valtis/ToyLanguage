@@ -23,8 +23,6 @@ Lexer::Lexer(std::istream &input) : m_input(input), m_current_line(1)
   m_string_tokens["-"] = TokenType::MINUS;
   m_string_tokens["*"] = TokenType::MULTIPLICATION;
   m_string_tokens["/"] = TokenType::DIVISION;
-  m_string_tokens["void"] = TokenType::VOID_TOKEN;
-  m_string_tokens["int"] = TokenType::INT_TOKEN;
 }
 
 

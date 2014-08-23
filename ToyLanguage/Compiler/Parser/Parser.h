@@ -16,15 +16,17 @@ public:
 private:
 
   bool HasTokens();
-  void NextToken();
-  Token PeekNextToken();
+  Token CurrentToken();
+  Token NextToken();
+  Token PeekToken();
   
-  void Expect(TokenType type);
+  Token Expect(TokenType type);
   void ExpectType();
   void ExpectNonVoidType();
 
   void ParseFunctionDeclaration();
   void ParseFunctionArguments(Function &f);
+  void ParseFunctionBody(Function &f);
   std::vector<std::string> m_lines;
   std::vector<Token> m_tokens;
   std::vector<Token>::iterator m_current_token;

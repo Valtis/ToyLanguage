@@ -1,3 +1,7 @@
-(fn main(a:int, b:int, c:double):int (
+(fn main ()(
+
+))
+
+(fn main ()(
 
 ))
