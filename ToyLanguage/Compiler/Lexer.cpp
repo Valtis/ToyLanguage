@@ -78,14 +78,7 @@ void Lexer::HandleTokens(const std::string &str_token)
 
   for (auto space_token : space_tokens)
   {
-    if (m_string_tokens.count(space_token) != 0)
-    {
-      m_syntax_tokens.push_back(Token{ m_string_tokens[space_token], space_token, m_current_line });
-    }
-    else
-    {
       HandleComplexToken(space_token);
-    }
   }
 }
 
@@ -97,51 +90,72 @@ void Lexer::HandleComplexToken(const std::string &token)
     return;
   }
 
-  auto parse_remnant_pair = MathReservedWordFromString(token);
-
-  if (!parse_remnant_pair.first.empty()) 
+  if (!MatchReservedWord(token) && !MatchNumber(token) && !MatchIdentifier(token) && !MatchSingleCharacterToken(token))
   {
-    m_syntax_tokens.push_back(Token{ m_string_tokens[parse_remnant_pair.first], parse_remnant_pair.first, m_current_line });
-    HandleComplexToken(parse_remnant_pair.second);
-    return;
+    throw InvalidTokenError("Invalid token " + token, m_current_line);
   }
+}
 
-  parse_remnant_pair = MatchNumberFromString(token);
 
-  if (!parse_remnant_pair.first.empty())
+bool Lexer::MatchReservedWord(const std::string &token)
+{
+  auto match = MathReservedWordFromString(token);
+  if (!match.match_string.empty())
   {
-    m_syntax_tokens.push_back(Token{ TokenType::NUMBER, parse_remnant_pair.first, m_current_line });
-    HandleComplexToken(parse_remnant_pair.second);
-    return;
+    return MatchTypeOf(m_string_tokens[match.match_string], match);
   }
+  return false;
+}
 
-  parse_remnant_pair = MatchIdentifierFromString(token);
-  if (!parse_remnant_pair.first.empty())
+
+bool Lexer::MatchNumber(const std::string &token)
+{
+  return MatchTypeOf(TokenType::NUMBER, MatchNumberFromString(token));
+}
+
+bool Lexer::MatchIdentifier(const std::string & token)
+{
+  return MatchTypeOf(TokenType::IDENT, MatchIdentifierFromString(token));
+}
+
+bool Lexer::MatchTypeOf(TokenType type, Match match)
+{
+  if (!match.match_string.empty())
   {
-    m_syntax_tokens.push_back(Token{ TokenType::IDENT, parse_remnant_pair.first, m_current_line });
-    HandleComplexToken(parse_remnant_pair.second);
-    return;
+    m_syntax_tokens.push_back(Token{ type, match.match_string, m_current_line });
+    
+     if (match.remnant_string.length() > 0 && !(match.remnant_string[0] == ')' || match.remnant_string[0] == '('))
+     {
+       throw InvalidTokenError("Invalid token", m_current_line);
+     }
+
+    return true;
   }
+  return false;
+}
 
 
+
+bool Lexer::MatchSingleCharacterToken(const std::string &token)
+{
   std::string chr(1, token[0]);
   if (m_string_tokens.count(chr) != 0)
   {
     m_syntax_tokens.push_back(Token{ m_string_tokens[chr], chr, m_current_line });
     HandleComplexToken(token.substr(1));
-    return;
+    return true;
   }
-
-  throw InvalidTokenError("Invalid token " + token, m_current_line);
+  return false;
 }
 
-std::pair<std::string, std::string> Lexer::MathReservedWordFromString(const std::string &characters) {
+
+Lexer::Match Lexer::MathReservedWordFromString(const std::string &characters) {
   for (auto word : m_reserved_words)
   {
     std::regex ex("^" + word);
     auto ret = MatchRegexFromString(characters, ex);
-    if (!ret.first.empty()) 
-    { 
+    if (!ret.match_string.empty())
+    {
       return ret;
     }
   }
@@ -149,7 +163,7 @@ std::pair<std::string, std::string> Lexer::MathReservedWordFromString(const std:
 }
 
 // returns pair where first member contains the parsed number, second contains remnant of the string
-std::pair<std::string, std::string> Lexer::MatchNumberFromString(const std::string &characters)
+Lexer::Match Lexer::MatchNumberFromString(const std::string &characters)
 {
   std::regex ex("^(\\+|-)?(\\d)+(\\.\\d+)?");
   return MatchRegexFromString(characters, ex);
@@ -157,28 +171,27 @@ std::pair<std::string, std::string> Lexer::MatchNumberFromString(const std::stri
 
 
 // returns pair where first member contains the parsed identifier, second contains remnant of the string
-std::pair<std::string, std::string> Lexer::MatchIdentifierFromString(const std::string &characters) 
+Lexer::Match Lexer::MatchIdentifierFromString(const std::string &characters)
 {
-
   std::regex ex("^\\w+(\\d|\\w|-|\\?|\\+|!|)*");
   return MatchRegexFromString(characters, ex);
 }
 
 
-std::pair<std::string, std::string> Lexer::MatchRegexFromString(const std::string &characters, const std::regex &ex)
+Lexer::Match Lexer::MatchRegexFromString(const std::string &characters, const std::regex &ex)
 {
-  std::pair<std::string, std::string> ret;
+  Match match_strings;
 
   std::smatch match;
- 
+
   std::regex_search(characters, match, ex);
 
   if (match.begin() != match.end()) {
-    ret.first = *match.begin();
+    match_strings.match_string = *match.begin();
   }
 
-  ret.second = match.suffix().str();
-  return ret;
+  match_strings.remnant_string = match.suffix().str();
+  return match_strings;
 }
 
 void Lexer::RemoveComment(std::string & line)
@@ -187,3 +200,4 @@ void Lexer::RemoveComment(std::string & line)
   int dist = std::distance(line.begin(), comment_start);
   line = line.substr(0, dist);
 }
+

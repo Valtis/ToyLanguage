@@ -49,10 +49,11 @@ int main()
     Lexer lexer(file);
     tokens = lexer.AnalyzeText();
 
-  /*  for (auto token : tokens.second) {
-      std::cout << "Type: " << tokenToString[token.Type()] << "\tValue: " << token.Value() << "\n";
-    }*/
-
+    std::cout << "Lexer output:\n";
+    for (auto token : tokens.second) {
+      std::cout << "  Type: " << tokenToString[token.Type()] << "\tValue: " << token.Value() << "\n";
+    }
+    std::cout << "\n";
     Parser parser(tokens);
 
     auto functions = parser.Parse();

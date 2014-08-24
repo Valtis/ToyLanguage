@@ -17,6 +17,7 @@ public:
   }
 
 private:
+
   int m_line_number;
 };
 
