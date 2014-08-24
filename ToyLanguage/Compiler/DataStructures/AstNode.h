@@ -2,8 +2,8 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
+#include <string>
 
-#include "Variable.h"
 class AstNode;
 
 
@@ -12,6 +12,7 @@ enum class NodeType { ROOT, FUNCTION_CALL, NUMBER };
 union NodeValue
 {
   double number;
+  char *text;
 };
 
 typedef std::shared_ptr < AstNode > Ast_Node;
@@ -65,6 +66,7 @@ public:
 
   void ValueAsNumber(const std::string &number)
   {
+    MaybeReleaseMemory();
     m_value.number = std::stod(number);
   }
 
@@ -73,12 +75,32 @@ public:
     return m_value.number;
   }
 
+  void ValueAsText(const std::string &text)
+  {
+    MaybeReleaseMemory();
+    
+    m_value.text = new char[text.length() + 1];
+
+#pragma warning( disable : 4996)
+    strncpy(m_value.text, text.c_str(), text.length()+1);
+
+    m_value.text[text.length()] = '\0';
+    m_release_char = true;
+  }
+
+  std::string ValueAsText()
+  {
+    return std::string(m_value.text);
+  }
   
 private:
+
+  void MaybeReleaseMemory();
   NodeType m_type;
   AstNode *m_parent;
-  std::vector<Ast_Node> m_children;
 
+  bool m_release_char;
+  std::vector<Ast_Node> m_children;
   NodeValue m_value;
 
 };

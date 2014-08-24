@@ -21,11 +21,13 @@ Lexer::Lexer(std::istream &input) : m_input(input), m_current_line(1)
   m_string_tokens[";"] = TokenType::SEMICOLON;
   m_string_tokens["var"] = TokenType::VARIABLE;
   m_string_tokens["\""] = TokenType::QUOTE;
-  m_string_tokens["="] = TokenType::ASSIGNMENT;
-  m_string_tokens["+"] = TokenType::PLUS;
-  m_string_tokens["-"] = TokenType::MINUS;
-  m_string_tokens["*"] = TokenType::MULTIPLICATION;
-  m_string_tokens["/"] = TokenType::DIVISION;
+
+  // inbuilt functions
+  m_string_tokens["="] = TokenType::IDENT;
+  m_string_tokens["+"] = TokenType::IDENT;
+  m_string_tokens["-"] = TokenType::IDENT;
+  m_string_tokens["*"] = TokenType::IDENT;
+  m_string_tokens["/"] = TokenType::IDENT;
 }
 
 

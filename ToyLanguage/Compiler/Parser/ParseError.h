@@ -34,6 +34,7 @@ PARSE_ERROR(UnexpectedTokenError)
 
 PARSE_ERROR(UnexpectedEOFError)
 PARSE_ERROR(UndefinedMainError)
+PARSE_ERROR(UndefinedFunctionCall)
 PARSE_ERROR(FunctionRedeclarationError)
 PARSE_ERROR(InvalidTokenError)
 

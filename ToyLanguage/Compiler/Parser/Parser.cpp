@@ -21,6 +21,13 @@ Parser::Parser(std::pair<std::vector<std::string>, std::vector<Token>> &tokens) 
   token_to_string[TokenType::QUOTE] = "\"";
   token_to_string[TokenType::IDENT] = "identifier";
   token_to_string[TokenType::MULTIPLICATION] = "*";
+
+
+  m_functions["+"] = Function("+", -1);
+  m_functions["-"] = Function("-", -1);
+  m_functions["*"] = Function("*", -1);
+  m_functions["/"] = Function("/", -1);
+  m_functions["print"] = Function("print", -1);
 }
 
 
@@ -83,44 +90,57 @@ void Parser::ParseFunctionBody(Function &f)
   auto root_node = std::make_shared<AstNode>(NodeType::ROOT);
   if (CurrentToken().Type() == TokenType::IDENT)
   {
-    ParseFunctionCall(f, root_node);
+    auto call_node = std::make_shared<AstNode>(NodeType::FUNCTION_CALL);
+    root_node->AddChild(call_node);
+    call_node->ValueAsText(CurrentToken().Value());
+    ParseFunctionCall(f, call_node);
   }
 
-
   Expect(TokenType::RPAREN);
+
+  f.SetRootNode(root_node);
 }
 
 
 
 void Parser::ParseFunctionCall(Function & f, Ast_Node node)
 {
-  Expect(TokenType::IDENT);
 
-  if (CurrentToken().Type() == TokenType::LPAREN)
+  if (m_functions.count(CurrentToken().Value()) == 0)
   {
-    NextToken();
-    auto call_node = std::make_shared<AstNode>(NodeType::FUNCTION_CALL);
-    node->AddChild(call_node);
-    ParseFunctionCall(f, call_node);
+    throw UndefinedFunctionCall("Call to undefined function " + CurrentToken().Value(), CurrentToken().LineNumber());
   }
+
+  NextToken();
+
+
 
   while (CurrentToken().Type() != TokenType::RPAREN)
   {
-    if (CurrentToken().Type() == TokenType::NUMBER)
+
+    if (CurrentToken().Type() == TokenType::LPAREN)
+    {
+      NextToken();
+      auto call_node = std::make_shared<AstNode>(NodeType::FUNCTION_CALL);
+      node->AddChild(call_node);
+      call_node->ValueAsText(CurrentToken().Value());
+      ParseFunctionCall(f, call_node);
+    }
+
+    else if (CurrentToken().Type() == TokenType::NUMBER)
     {
       auto call_node = std::make_shared<AstNode>(NodeType::NUMBER);
       call_node->ValueAsNumber(CurrentToken().Value());
       node->AddChild(call_node);
+    
     }
     else
     {
-      throw InvalidTokenError("Invalid token " + CurrentToken().Value(), CurrentToken().LineNumber());
+      throw UnexpectedTokenError("Unexpected token " + CurrentToken().Value(), CurrentToken().LineNumber());
     }
-
     NextToken();
+   
   }
-
-  Expect(TokenType::RPAREN);
 
 }
 
@@ -161,7 +181,7 @@ Token Parser::Expect(TokenType type)
 
   if (m_current_token == m_tokens.end())
   {
-    throw UnexpectedEOFError("Unexpected end of file", m_tokens.back().LineNumber());
+    throw UnexpectedEOFError("Unexpected end of file. Expected token'" + token_to_string[type] + "' ", m_tokens.back().LineNumber());
   }
 
   if (m_current_token->Type() != type)

@@ -6,7 +6,7 @@
 #include "Compiler/Parser/ParseError.h"
 
 #include <regex>
-void Traverse(const Ast_Node &node);
+void TraverseAst(const Ast_Node &node, int level = 0);
 int main()
 {
   auto file = std::ifstream("file.txt");
@@ -17,7 +17,7 @@ int main()
     system("pause");
     return -1;
   }
-  
+
 
   std::unordered_map<TokenType, std::string> tokenToString;
   tokenToString[TokenType::FUNCTION] = "Function";
@@ -40,7 +40,7 @@ int main()
 
 
 
- 
+
 
 
   std::pair < std::vector < std::string>, std::vector<Token>> tokens;
@@ -49,24 +49,40 @@ int main()
     Lexer lexer(file);
     tokens = lexer.AnalyzeText();
 
-    std::cout << "Lexer output:\n";
+ /*   std::cout << "Lexer output:\n";
     for (auto token : tokens.second) {
-      std::cout << "  Type: " << tokenToString[token.Type()] << "\tValue: " << token.Value() << "\n";
-    }
+      std::cout << "  Type: " << tokenToString[token.Type()] << "\tValue: " << token.Value() << "\tLine " << token.LineNumber() << "\n";
+    }*/
     std::cout << "\n";
     Parser parser(tokens);
 
     auto functions = parser.Parse();
+
+
+    for (auto f : functions)
+    {
+      std::cout << "  Function: " << f.second.Name() << "\tDeclared at line: " << f.second.DeclarationLine() << "\t\n";
+      TraverseAst(f.second.RootNode());
+      std::cout << "\n\n";
+
+    }
+
+
+
   }
   catch (const InvalidTokenError &ex)
   {
-    std::cout << "Lexer error at line " + std::to_string(ex.LineNumber()+1) + "\n";
+    std::cout << "Lexer error at line " + std::to_string(ex.LineNumber()) + "\n";
+    std::cout << ex.what() << "\n";
+  }
+  catch (const UnexpectedEOFError &ex)
+  {
     std::cout << ex.what() << "\n";
   }
   catch (const ParseError &ex)
   {
-    std::cout << "Parse error at line " + std::to_string(ex.LineNumber()+1) + "\n";
-    std::cout << "  >>> " << tokens.first[ex.LineNumber()] << "\n";
+    std::cout << "Parse error at line " + std::to_string(ex.LineNumber()) + "\n";
+    std::cout << "  >>> " << tokens.first[ex.LineNumber() - 1] << "\n";
     std::cout << ex.what() << "\n";
   }
   catch (const std::logic_error &ex)
@@ -77,4 +93,54 @@ int main()
 
 
   system("pause");
+}
+
+
+
+std::string node_name(NodeType type)
+{
+  switch (type)
+  {
+  case NodeType::FUNCTION_CALL:
+    return "Function call";
+  case NodeType::NUMBER:
+    return "Number";
+  case NodeType::ROOT:
+    return "Root";
+  default:
+    return "TBD";
+  }
+}
+
+std::string node_value(const Ast_Node &node)
+{
+  switch (node->Type())
+  {
+  case NodeType::NUMBER:
+    return std::to_string(node->ValueAsNumber());
+  case NodeType::FUNCTION_CALL:
+    return node->ValueAsText();
+  default:
+    return "";
+  }
+}
+
+void TraverseAst(const Ast_Node &node, int level)
+{
+  if (node == nullptr)
+  {
+    return;
+  }
+
+  std::string spaces = "    ";
+  for (int i = 0; i < level; ++i)
+  {
+    spaces += "  ";
+  }
+  std::cout << spaces << "Node type: " << node_name(node->Type()) << "\t" << spaces << "Node value: " << node_value(node) << "\n";
+
+  for (auto child : node->Children())
+  {
+    TraverseAst(child, level + 1);
+  }
 }
