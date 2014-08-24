@@ -1,8 +1,5 @@
 #include "Parser.h"
 #include "ParseError.h"
-#include <list>
-#include <algorithm>
-
 
 Parser::Parser(std::pair<std::vector<std::string>, std::vector<Token>> &tokens) : m_lines(tokens.first), m_tokens(tokens.second), m_current_token(m_tokens.begin())
 {
@@ -42,7 +39,7 @@ std::unordered_map<std::string, Function> Parser::Parse()
 
   if (m_functions.count("main") == 0)
   {
-    throw UndefinedMainError("main-function not defined", m_tokens.back().LineNumber()+1);
+    throw UndefinedMainError("main-function not defined", m_tokens.back().LineNumber() + 1);
   }
 
   return m_functions;
@@ -55,9 +52,7 @@ void Parser::ParseFunctionDeclaration()
   Expect(TokenType::FUNCTION);
 
   auto name_token = Expect(TokenType::IDENT);
-  if (m_functions.count(name_token.Value()) != 0) {
-    throw FunctionRedeclarationError("Redeclaration of function '" + name_token.Value() + "'", name_token.LineNumber());
-  }
+  VerifyNoFunctionRedeclaration(name_token);
 
   ParseFunctionArguments(f);
   ParseFunctionBody(f);
@@ -70,6 +65,11 @@ void Parser::ParseFunctionDeclaration()
 void Parser::ParseFunctionArguments(Function &f)
 {
   Expect(TokenType::LPAREN);
+
+  while (CurrentToken().Type() == TokenType::IDENT) {
+    NextToken();
+  }
+
   Expect(TokenType::RPAREN);
 }
 
@@ -123,11 +123,17 @@ Token Parser::Expect(TokenType type)
 
   if (m_current_token->Type() != type)
   {
-    throw UnexpectedTokenError("Expected '" + token_to_string[type] + "', actual '" + token_to_string[m_current_token->Type()] + "'", m_current_token->LineNumber());
+    throw UnexpectedTokenError("Expected '" + token_to_string[type] + "', actual '" + m_current_token->Value() + "' (type: " + token_to_string[m_current_token->Type()] + ")", m_current_token->LineNumber());
   }
   auto token = CurrentToken();
   ++m_current_token;
-  //NextToken();
 
   return token;
+}
+
+void Parser::VerifyNoFunctionRedeclaration(Token &name_token)
+{
+  if (m_functions.count(name_token.Value()) != 0) {
+    throw FunctionRedeclarationError("Redeclaration of function '" + name_token.Value() + "'", name_token.LineNumber());
+  }
 }

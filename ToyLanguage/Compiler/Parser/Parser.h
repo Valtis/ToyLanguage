@@ -25,6 +25,9 @@ private:
   void ExpectNonVoidType();
 
   void ParseFunctionDeclaration();
+
+  void VerifyNoFunctionRedeclaration(Token &name_token);
+
   void ParseFunctionArguments(Function &f);
   void ParseFunctionBody(Function &f);
   std::vector<std::string> m_lines;

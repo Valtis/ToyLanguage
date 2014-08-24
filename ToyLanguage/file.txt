@@ -1,7 +1,2 @@
-(fn main ()(
-
-))
-
-(fn main ()(
-
+(fn main (c123)(print (+ 4.5 (* 5 -7.23))
 ))

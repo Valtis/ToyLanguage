@@ -4,6 +4,8 @@
 #include "Compiler/Parser/Parser.h"
 #include "Compiler/DataStructures/AstNode.h"
 #include "Compiler/Parser/ParseError.h"
+
+#include <regex>
 void Traverse(const Ast_Node &node);
 int main()
 {
@@ -15,7 +17,7 @@ int main()
     system("pause");
     return -1;
   }
-  Lexer lexer(file);
+  
 
   std::unordered_map<TokenType, std::string> tokenToString;
   tokenToString[TokenType::FUNCTION] = "Function";
@@ -38,16 +40,32 @@ int main()
 
 
 
-  auto tokens = lexer.AnalyzeText();
-  Parser parser(tokens);
+ 
 
+
+  std::pair < std::vector < std::string>, std::vector<Token>> tokens;
   try
   {
+    Lexer lexer(file);
+    tokens = lexer.AnalyzeText();
+
+  /*  for (auto token : tokens.second) {
+      std::cout << "Type: " << tokenToString[token.Type()] << "\tValue: " << token.Value() << "\n";
+    }*/
+
+    Parser parser(tokens);
+
     auto functions = parser.Parse();
+  }
+  catch (const InvalidTokenError &ex)
+  {
+    std::cout << "Lexer error at line " + std::to_string(ex.LineNumber()) + "\n";
+    std::cout << ex.what() << "\n";
   }
   catch (const ParseError &ex)
   {
     std::cout << "Parse error at line " + std::to_string(ex.LineNumber()) + "\n";
+    std::cout << "  >>> " << tokens.first[ex.LineNumber()-1] << "\n";
     std::cout << ex.what() << "\n";
   }
   catch (const std::logic_error &ex)
@@ -58,5 +76,4 @@ int main()
 
 
   system("pause");
-
 }
