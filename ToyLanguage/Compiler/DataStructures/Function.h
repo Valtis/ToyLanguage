@@ -12,6 +12,7 @@ public:
   void SetRootNode(std::shared_ptr<AstNode> node);
   std::shared_ptr<AstNode> RootNode() { return m_root_node; }
   std::string Name() const { return m_name;  }
+
   int DeclarationLine() const { return m_declaration_line;  }
   int ParameterCount() const { return m_parameters.size();  }
 

@@ -2,17 +2,24 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
-#include "OperationType.h"
+
 #include "Variable.h"
 class AstNode;
+
+
+enum class NodeType { ROOT, FUNCTION_CALL, NUMBER };
+
+union NodeValue
+{
+  double number;
+};
 
 typedef std::shared_ptr < AstNode > Ast_Node;
 
 class AstNode
 {
 public:
-  AstNode();
-  AstNode(OperationType type);
+  AstNode(NodeType type);
 
 
   ~AstNode();
@@ -46,21 +53,33 @@ public:
     return m_children;
   }
 
-  void SetType(OperationType type)
+  void SetType(NodeType type)
   {
     m_type = type;
   }
 
-  OperationType Type()
+  NodeType Type()
   {
     return m_type;
   }
 
-private:
-  OperationType m_type;
+  void ValueAsNumber(const std::string &number)
+  {
+    m_value.number = std::stod(number);
+  }
 
+  double ValueAsNumber()
+  {
+    return m_value.number;
+  }
+
+  
+private:
+  NodeType m_type;
   AstNode *m_parent;
   std::vector<Ast_Node> m_children;
+
+  NodeValue m_value;
 
 };
 

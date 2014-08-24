@@ -1,6 +1,11 @@
 #pragma once
-#include "TokenType.h"
+
 #include <string>
+
+enum class TokenType : int {
+  INVALID_TOKEN, FUNCTION, WHILE, IF, TEXT, IDENT, NUMBER, LPAREN, RPAREN, LBRACE, RBRACE, COMMA, COLON, SEMICOLON, VARIABLE, QUOTE, ASSIGNMENT,
+  PLUS, MINUS, MULTIPLICATION, DIVISION
+};
 
 class Token
 {

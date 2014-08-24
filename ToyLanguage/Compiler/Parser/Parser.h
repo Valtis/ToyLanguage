@@ -30,6 +30,7 @@ private:
 
   void ParseFunctionArguments(Function &f);
   void ParseFunctionBody(Function &f);
+  void ParseFunctionCall(Function & f, Ast_Node node);
   std::vector<std::string> m_lines;
   std::vector<Token> m_tokens;
   std::vector<Token>::iterator m_current_token;

@@ -47,12 +47,14 @@ std::unordered_map<std::string, Function> Parser::Parse()
 
 void Parser::ParseFunctionDeclaration()
 {
-  Function f;
+
   Expect(TokenType::LPAREN);
   Expect(TokenType::FUNCTION);
 
   auto name_token = Expect(TokenType::IDENT);
   VerifyNoFunctionRedeclaration(name_token);
+  Function f(name_token.Value(), name_token.LineNumber());
+
 
   ParseFunctionArguments(f);
   ParseFunctionBody(f);
@@ -77,9 +79,50 @@ void Parser::ParseFunctionArguments(Function &f)
 void Parser::ParseFunctionBody(Function &f)
 {
   Expect(TokenType::LPAREN);
+
+  auto root_node = std::make_shared<AstNode>(NodeType::ROOT);
+  if (CurrentToken().Type() == TokenType::IDENT)
+  {
+    ParseFunctionCall(f, root_node);
+  }
+
+
   Expect(TokenType::RPAREN);
 }
 
+
+
+void Parser::ParseFunctionCall(Function & f, Ast_Node node)
+{
+  Expect(TokenType::IDENT);
+
+  if (CurrentToken().Type() == TokenType::LPAREN)
+  {
+    NextToken();
+    auto call_node = std::make_shared<AstNode>(NodeType::FUNCTION_CALL);
+    node->AddChild(call_node);
+    ParseFunctionCall(f, call_node);
+  }
+
+  while (CurrentToken().Type() != TokenType::RPAREN)
+  {
+    if (CurrentToken().Type() == TokenType::NUMBER)
+    {
+      auto call_node = std::make_shared<AstNode>(NodeType::NUMBER);
+      call_node->ValueAsNumber(CurrentToken().Value());
+      node->AddChild(call_node);
+    }
+    else
+    {
+      throw InvalidTokenError("Invalid token " + CurrentToken().Value(), CurrentToken().LineNumber());
+    }
+
+    NextToken();
+  }
+
+  Expect(TokenType::RPAREN);
+
+}
 
 
 
@@ -87,7 +130,7 @@ Token Parser::CurrentToken()
 {
   if (m_current_token == m_tokens.end())
   {
-    throw UnexpectedEOFError("Unexpected end of file", m_tokens.back().LineNumber() + 1);
+    throw UnexpectedEOFError("Unexpected end of file", m_tokens.back().LineNumber());
   }
   return *m_current_token;
 }
@@ -102,7 +145,7 @@ Token Parser::PeekToken()
 {
   if (m_current_token + 1 == m_tokens.end())
   {
-    throw UnexpectedEOFError("Unexpected end of file", m_tokens.back().LineNumber() + 1);
+    throw UnexpectedEOFError("Unexpected end of file", m_tokens.back().LineNumber());
   }
   return *(m_current_token + 1);
 }
@@ -118,7 +161,7 @@ Token Parser::Expect(TokenType type)
 
   if (m_current_token == m_tokens.end())
   {
-    throw UnexpectedEOFError("Unexpected end of file", m_tokens.back().LineNumber() + 1);
+    throw UnexpectedEOFError("Unexpected end of file", m_tokens.back().LineNumber());
   }
 
   if (m_current_token->Type() != type)

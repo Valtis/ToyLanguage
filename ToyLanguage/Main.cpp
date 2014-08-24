@@ -60,13 +60,13 @@ int main()
   }
   catch (const InvalidTokenError &ex)
   {
-    std::cout << "Lexer error at line " + std::to_string(ex.LineNumber()) + "\n";
+    std::cout << "Lexer error at line " + std::to_string(ex.LineNumber()+1) + "\n";
     std::cout << ex.what() << "\n";
   }
   catch (const ParseError &ex)
   {
-    std::cout << "Parse error at line " + std::to_string(ex.LineNumber()) + "\n";
-    std::cout << "  >>> " << tokens.first[ex.LineNumber()-1] << "\n";
+    std::cout << "Parse error at line " + std::to_string(ex.LineNumber()+1) + "\n";
+    std::cout << "  >>> " << tokens.first[ex.LineNumber()] << "\n";
     std::cout << ex.what() << "\n";
   }
   catch (const std::logic_error &ex)
