@@ -129,6 +129,8 @@ bool Lexer::MatchTypeOf(TokenType type, Match match)
        throw InvalidTokenError("Invalid token", m_current_line);
      }
 
+     HandleComplexToken(match.remnant_string);
+
     return true;
   }
   return false;
