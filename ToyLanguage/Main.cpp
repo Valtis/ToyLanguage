@@ -4,7 +4,9 @@
 #include "Compiler/Parser/Parser.h"
 #include "Compiler/DataStructures/AstNode.h"
 #include "Compiler/Parser/ParseError.h"
+#include "Compiler/CodeGen/CodeGenerator.h"
 
+#include "VM/VM.h"
 #include <regex>
 void TraverseAst(const Ast_Node &node, int level = 0);
 int main()
@@ -67,8 +69,15 @@ int main()
 
     }
 
+    
 
-
+    CodeGenerator generator;
+    auto code = generator.GenerateCode(functions);
+    
+    
+    VM vm;
+    vm.Initialize(code);
+    vm.Execute();
   }
   catch (const InvalidTokenError &ex)
   {
@@ -88,6 +97,11 @@ int main()
   catch (const std::logic_error &ex)
   {
     std::cout << "Internal error\n";
+    std::cout << ex.what() << "\n";
+  }
+  catch (const std::exception &ex)
+  {
+    std::cout << "Error\n";
     std::cout << ex.what() << "\n";
   }
 

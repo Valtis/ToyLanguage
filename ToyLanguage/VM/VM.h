@@ -8,7 +8,7 @@ class VM
 {
 public:
 
-  void Initialize();
+  void Initialize(std::unordered_map<int, VMFunction> code);
   void Execute();
   
 private:

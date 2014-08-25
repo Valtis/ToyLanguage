@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <functional>
+#include <set>
 #include <unordered_map>
 #include "../DataStructures/Function.h"
 #include "../DataStructures/Token.h"
@@ -36,6 +37,7 @@ private:
   std::vector<Token>::iterator m_current_token;
   std::unordered_map<TokenType, std::string> token_to_string;
   std::unordered_map<std::string, Function> m_functions;
+  std::set<std::string> m_inbuilt_functions;
 
   Ast_Node m_root_node;
 

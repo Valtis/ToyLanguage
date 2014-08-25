@@ -23,11 +23,11 @@ Parser::Parser(std::pair<std::vector<std::string>, std::vector<Token>> &tokens) 
   token_to_string[TokenType::MULTIPLICATION] = "*";
 
 
-  m_functions["+"] = Function("+", -1);
-  m_functions["-"] = Function("-", -1);
-  m_functions["*"] = Function("*", -1);
-  m_functions["/"] = Function("/", -1);
-  m_functions["print"] = Function("print", -1);
+  m_inbuilt_functions.insert("+");
+  m_inbuilt_functions.insert("-");
+  m_inbuilt_functions.insert("*");
+  m_inbuilt_functions.insert("/");
+  m_inbuilt_functions.insert("print");
 }
 
 
@@ -106,7 +106,7 @@ void Parser::ParseFunctionBody(Function &f)
 void Parser::ParseFunctionCall(Function & f, Ast_Node node)
 {
 
-  if (m_functions.count(CurrentToken().Value()) == 0)
+  if (m_functions.count(CurrentToken().Value()) == 0 && m_inbuilt_functions.count(CurrentToken().Value()) == 0)
   {
     throw UndefinedFunctionCall("Call to undefined function " + CurrentToken().Value(), CurrentToken().LineNumber());
   }
@@ -197,6 +197,7 @@ Token Parser::Expect(TokenType type)
 void Parser::VerifyNoFunctionRedeclaration(Token &name_token)
 {
   if (m_functions.count(name_token.Value()) != 0) {
-    throw FunctionRedeclarationError("Redeclaration of function '" + name_token.Value() + "'", name_token.LineNumber());
+    throw FunctionRedeclarationError("Redeclaration of function '" + name_token.Value() + "'. Previous declaration at line " + 
+      std::to_string(m_functions[name_token.Value()].DeclarationLine()), name_token.LineNumber());
   }
 }

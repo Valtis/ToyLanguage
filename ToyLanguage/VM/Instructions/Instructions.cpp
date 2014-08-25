@@ -3,9 +3,11 @@
 #include <functional>
 #include <cstdio>
 void TwoOperandOperationWithResult(StackFrame &frame, VMObject(*operation)(const VMObject &, const VMObject &))
-{
+{ 
+
   VMObject second = Pop(frame);
   VMObject first = Pop(frame);
+  
   Push(frame, operation(first, second));
 }
 

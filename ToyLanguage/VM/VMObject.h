@@ -9,7 +9,7 @@ struct VMObject
   {
     type = VMObjectType::NONE; 
   }
-
+  
   union
   {
     double number;
