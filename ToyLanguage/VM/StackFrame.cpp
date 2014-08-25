@@ -1,7 +1,7 @@
 #include "StackFrame.h"
 
 
-StackFrame::StackFrame()
+StackFrame::StackFrame(int functionID) : m_functionID(functionID), m_instruction_pointer(0)
 {
 }
 
