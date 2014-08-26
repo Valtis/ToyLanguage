@@ -4,6 +4,7 @@
 #include "Compiler/Parser/Parser.h"
 #include "Compiler/DataStructures/AstNode.h"
 #include "Compiler/Parser/ParseError.h"
+#include "Compiler/SemanticAnalyzer/SemanticAnalyzer.h"
 #include "Compiler/CodeGen/CodeGenerator.h"
 
 #include "VM/VM.h"
@@ -61,6 +62,8 @@ int main()
     auto functions = parser.Parse();
 
 
+
+    std::cout << "\Before semantic analysis:----------------\n\n";
     for (auto f : functions)
     {
       std::cout << "  Function: " << f.second.Name() << "\tDeclared at line: " << f.second.DeclarationLine() << "\t\n";
@@ -69,7 +72,22 @@ int main()
 
     }
 
+
+    SemanticAnalyzer analyzer;
+    functions = analyzer.Analyze(functions);
+      
     
+    std::cout << "\nAfter semantic analysis:----------------\n\n";
+    for (auto f : functions)
+    {
+      std::cout << "  Function: " << f.second.Name() << "\tDeclared at line: " << f.second.DeclarationLine() << "\t\n";
+      TraverseAst(f.second.RootNode());
+      std::cout << "\n\n";
+
+    }
+
+
+
 
     CodeGenerator generator;
     auto code = generator.GenerateCode(functions);

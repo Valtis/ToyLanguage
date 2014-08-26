@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
-
+#include <functional>
 class AstNode;
 
 
@@ -41,7 +41,19 @@ public:
         return;
       }
     }
-    
+  }
+
+  void ReplaceChild(Ast_Node old_node, Ast_Node new_node)
+  {
+    for (size_t i = 0; i < m_children.size(); ++i)
+    {
+      if (m_children[i] == old_node)
+      {
+        new_node->m_parent = this;
+        m_children[i] = new_node;
+        return;
+      }
+    }
   }
 
   AstNode *Parent()
