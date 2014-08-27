@@ -1,8 +1,6 @@
 #include "VM.h"
 #include "Instructions/Instructions.h"
 
-
-
 void VM::Initialize(std::unordered_map<int, VMFunction> code)
 {
   m_functions = code;
@@ -41,6 +39,13 @@ void VM::Execute()
       break;
     case Instruction::PRINT:
       Print(m_frames.back());
+      break;
+
+    case Instruction::CALLFUNCTION:
+      CallFunction(this, m_frames.back());
+      break;
+    case  Instruction::RETURN:
+      Return(this, m_frames.back());
       break;
 
     case Instruction::PUSH:

@@ -1,5 +1,9 @@
 #include "Instructions.h"
 #include "ConversionFunctions.h"
+#include "..\StackFrame.h"
+#include "..\VMObject.h"
+#include "..\VM.h"
+
 #include <functional>
 #include <cstdio>
 void TwoOperandOperationWithResult(StackFrame &frame, VMObject(*operation)(const VMObject &, const VMObject &))
@@ -45,6 +49,18 @@ void Div(StackFrame &frame)
     o.value.number /= second.value.number;
     return o;
   });
+}
+
+void CallFunction(VM *vm, StackFrame &frame)
+{
+  VMObject new_function_id = Pop(frame);
+  StackFrame new_frame(new_function_id.value.integer);
+  vm->PushFrame(new_frame);
+}
+
+void Return(VM *vm, StackFrame &frame)
+{
+  vm->PopFrame();
 }
 
 

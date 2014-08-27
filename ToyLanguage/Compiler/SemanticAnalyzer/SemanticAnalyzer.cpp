@@ -10,7 +10,7 @@ std::unordered_map<std::string, Function> SemanticAnalyzer::Analyze(std::unorder
   for (auto &pair : functions)
   {
     Function f = pair.second;
-    TransformAst(f.RootNode(), BIND(TransformArithmeticInstructions));
+    TraverseAst(f.RootNode(), BIND(TransformArithmeticInstructions));
   }
   return functions;
 }

@@ -12,7 +12,6 @@ std::string as_string(const VMObject &o)
     return "";
 
 
-
   }
 }
 

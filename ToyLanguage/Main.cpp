@@ -63,7 +63,7 @@ int main()
 
 
 
-    std::cout << "\Before semantic analysis:----------------\n\n";
+    std::cout << "Before semantic analysis:----------------\n\n";
     for (auto f : functions)
     {
       std::cout << "  Function: " << f.second.Name() << "\tDeclared at line: " << f.second.DeclarationLine() << "\t\n";

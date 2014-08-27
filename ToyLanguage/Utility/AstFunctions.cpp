@@ -1,6 +1,6 @@
 #include "AstFunctions.h"
 
-void TransformAst(Ast_Node &node, const std::function<void(Ast_Node &node)> &transformer)
+void TraverseAst(Ast_Node &node, const std::function<void(Ast_Node &node)> &transformer)
 {
   if (node == nullptr)
   {
@@ -9,7 +9,7 @@ void TransformAst(Ast_Node &node, const std::function<void(Ast_Node &node)> &tra
 
   for (auto node : node->Children())
   {
-    TransformAst(node, transformer);
+    TraverseAst(node, transformer);
   }
 
   transformer(node);

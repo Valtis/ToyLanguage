@@ -1,6 +1,6 @@
 #pragma once
 
-enum class VMObjectType : int { NONE, NUMBER };
+enum class VMObjectType : int { NONE, NUMBER, INTEGER };
 
 struct VMObject
 {
@@ -13,7 +13,7 @@ struct VMObject
   union
   {
     double number;
-
+    int integer;
   } value;
 
   VMObjectType type;

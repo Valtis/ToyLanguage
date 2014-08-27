@@ -14,8 +14,11 @@ public:
   
 private:
   VMFunction GenerateCodeForFunction(Function &f);
-  void TraverseAst(const Ast_Node &node, VMFunction &f);
+  void Generator(const Ast_Node &node, VMFunction &vm_function);
   void GeneratePushNumberInstruction(const Ast_Node & node, VMFunction & vm_function);
   void GenerateFunctionCallInstruction(const Ast_Node & node, VMFunction & vm_function);
   void AddArithmeticInstruction(size_t instruction_child_count, VMFunction & vm_function, Instruction instruction);
+
+
+  std::unordered_map<std::string, int> m_function_names_to_ids;
 };

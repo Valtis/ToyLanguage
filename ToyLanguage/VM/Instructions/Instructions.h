@@ -1,10 +1,16 @@
 #pragma once
-#include "..\StackFrame.h"
+class VM;
+class StackFrame;
+struct VMObject;
 
 void Add(StackFrame &frame);
 void Sub(StackFrame &frame);
 void Mul(StackFrame &frame);
 void Div(StackFrame &frame);
+
+
+void CallFunction(VM *vm, StackFrame &frame);
+void Return(VM *vm, StackFrame &frame);
 
 void Print(StackFrame &frame); 
 

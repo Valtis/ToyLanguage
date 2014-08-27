@@ -11,6 +11,18 @@ public:
   void Initialize(std::unordered_map<int, VMFunction> code);
   void Execute();
   
+  void PushFrame(StackFrame &frame)
+  {
+    m_frames.push_back(frame);
+  }
+
+  StackFrame PopFrame()
+  {
+    auto ret = m_frames.back();
+    m_frames.pop_back();
+    return ret;
+  }
+
 private:
   bool m_running = true;
   int m_frame_pointer;
