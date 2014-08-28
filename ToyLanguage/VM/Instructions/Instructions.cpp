@@ -67,10 +67,14 @@ void Return(VM *vm, StackFrame &frame)
 void Print(StackFrame &frame)
 {
   VMObject o = Pop(frame);
-  puts(as_string(o).c_str());
+  fputs(as_string(o).c_str(), stdout);
 }
 
-
+void PrintLine(StackFrame &frame)
+{
+  VMObject o = Pop(frame);
+  puts(as_string(o).c_str());
+}
 
 void Push(StackFrame &frame, const VMObject &o)
 {

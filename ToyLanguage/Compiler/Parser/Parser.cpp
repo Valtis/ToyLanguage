@@ -1,5 +1,6 @@
 #include "Parser.h"
 #include "ParseError.h"
+#include "../FunctionDefines.h"
 
 Parser::Parser(std::pair<std::vector<std::string>, std::vector<Token>> &tokens) : m_lines(tokens.first), m_tokens(tokens.second), m_current_token(m_tokens.begin())
 {
@@ -23,11 +24,12 @@ Parser::Parser(std::pair<std::vector<std::string>, std::vector<Token>> &tokens) 
   token_to_string[TokenType::MULTIPLICATION] = "*";
 
 
-  m_inbuilt_functions.insert("+");
-  m_inbuilt_functions.insert("-");
-  m_inbuilt_functions.insert("*");
-  m_inbuilt_functions.insert("/");
-  m_inbuilt_functions.insert("print");
+  m_inbuilt_functions.insert(FN_ADD);
+  m_inbuilt_functions.insert(FN_SUB);
+  m_inbuilt_functions.insert(FN_MUL);
+  m_inbuilt_functions.insert(FN_DIV);
+  m_inbuilt_functions.insert(FN_PRINT);
+  m_inbuilt_functions.insert(FN_PRINTLN);
 }
 
 
@@ -46,7 +48,7 @@ std::unordered_map<std::string, Function> Parser::Parse()
 
   if (m_functions.count("main") == 0)
   {
-    throw UndefinedMainError("main-function not defined", m_tokens.back().LineNumber() + 1);
+    throw UndefinedMainError("main-function not defined", m_tokens.back().LineNumber());
   }
 
   return m_functions;
@@ -132,14 +134,14 @@ void Parser::ParseFunctionCall(Function & f, Ast_Node node)
       auto call_node = std::make_shared<AstNode>(NodeType::NUMBER);
       call_node->ValueAsNumber(CurrentToken().Value());
       node->AddChild(call_node);
-    
+
     }
     else
     {
       throw UnexpectedTokenError("Unexpected token " + CurrentToken().Value(), CurrentToken().LineNumber());
     }
     NextToken();
-   
+
   }
 
 }
@@ -197,7 +199,13 @@ Token Parser::Expect(TokenType type)
 void Parser::VerifyNoFunctionRedeclaration(Token &name_token)
 {
   if (m_functions.count(name_token.Value()) != 0) {
-    throw FunctionRedeclarationError("Redeclaration of function '" + name_token.Value() + "'. Previous declaration at line " + 
+    throw FunctionRedeclarationError("Redeclaration of function '" + name_token.Value() + "'. Previous declaration at line " +
       std::to_string(m_functions[name_token.Value()].DeclarationLine()), name_token.LineNumber());
   }
+  else if (m_inbuilt_functions.count(name_token.Value()) != 0)
+  {
+    throw FunctionRedeclarationError("Declaration of function '" + name_token.Value() + "' shadows inbuilt function", name_token.LineNumber());
+  }
+
+
 }

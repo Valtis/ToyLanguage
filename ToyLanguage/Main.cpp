@@ -93,8 +93,11 @@ int main()
     auto code = generator.GenerateCode(functions);
     
     
+
     VM vm;
+    std::cout << "\nInitializing VM...\n";
     vm.Initialize(code);
+    std::cout << "Executing program...\n";
     vm.Execute();
   }
   catch (const InvalidTokenError &ex)

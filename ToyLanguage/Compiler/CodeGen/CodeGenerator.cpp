@@ -1,7 +1,7 @@
 #include "CodeGenerator.h"
 #include "../../VM/ByteCode.h"
 #include "../../Utility/AstFunctions.h"
-
+#include "../FunctionDefines.h"
 
 std::unordered_map<int, VMFunction> CodeGenerator::GenerateCode(const std::unordered_map<std::string, Function> functions)
 {
@@ -72,26 +72,12 @@ void CodeGenerator::GeneratePushNumberInstruction(const Ast_Node & node, VMFunct
 void CodeGenerator::GenerateFunctionCallInstruction(const Ast_Node & node, VMFunction & vm_function)
 {
 
-  // TODO: replace with something slightly more sane
-  if (node->ValueAsText() == "+")
+  std::unordered_map<std::string, Instruction> inbuilt_functions = { { FN_ADD, Instruction::ADD }, { FN_SUB, Instruction::SUB },
+  { FN_MUL, Instruction::MUL }, { FN_DIV, Instruction::DIV }, { FN_PRINT, Instruction::PRINT }, { FN_PRINTLN, Instruction::PRINTLINE } };
+
+  if (inbuilt_functions.count(node->ValueAsText()) != 0)
   {
-    AddArithmeticInstruction(node->Children().size(), vm_function, Instruction::ADD);
-  }
-  else if (node->ValueAsText() == "-")
-  {
-    AddArithmeticInstruction(node->Children().size(), vm_function, Instruction::SUB);
-  }
-  else if (node->ValueAsText() == "*")
-  {
-    vm_function.AddByteCode(ByteCode{ Instruction::MUL, nullptr });
-  }
-  else if (node->ValueAsText() == "/")
-  {
-    vm_function.AddByteCode(ByteCode{ Instruction::DIV, nullptr });
-  }
-  else if (node->ValueAsText() == "print")
-  {
-    vm_function.AddByteCode(ByteCode{ Instruction::PRINT, nullptr });
+    vm_function.AddByteCode(ByteCode{ inbuilt_functions[node->ValueAsText()], nullptr });
   }
   else 
   {
@@ -105,7 +91,3 @@ void CodeGenerator::GenerateFunctionCallInstruction(const Ast_Node & node, VMFun
 
 }
 
-void CodeGenerator::AddArithmeticInstruction(size_t instruction_child_count, VMFunction & vm_function, Instruction instruction)
-{
-  vm_function.AddByteCode(ByteCode{ instruction, nullptr });
-}

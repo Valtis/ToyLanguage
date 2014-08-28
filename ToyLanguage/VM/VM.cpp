@@ -1,6 +1,7 @@
 #include "VM.h"
 #include "Instructions/Instructions.h"
-
+#include "VMError.h"
+#include <string>
 void VM::Initialize(std::unordered_map<int, VMFunction> code)
 {
   m_functions = code;
@@ -37,9 +38,16 @@ void VM::Execute()
     case Instruction::DIV:
       Div(m_frames.back());
       break;
+
+
     case Instruction::PRINT:
       Print(m_frames.back());
       break;
+    case Instruction::PRINTLINE:
+      PrintLine(m_frames.back());
+      break;
+
+
 
     case Instruction::CALLFUNCTION:
       CallFunction(this, m_frames.back());
@@ -51,6 +59,9 @@ void VM::Execute()
     case Instruction::PUSH:
       Push(m_frames.back(), *code.GetObject());
       break;
+
+    default:
+      throw UndefinedInstructionError(std::string("Instruction ") + std::to_string(static_cast<int>(code.GetInstruction())) + " was not recognized by the virtual machine");
     }
   }
 }

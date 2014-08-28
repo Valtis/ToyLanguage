@@ -1,8 +1,8 @@
 #include "SemanticAnalyzer.h"
 #include <functional>
-#include <set>
+#include <map>
 #include "../../Utility/AstFunctions.h"
-
+#include "../FunctionDefines.h"
 #define BIND(NAME__) std::bind(&SemanticAnalyzer::NAME__, this, std::placeholders::_1)
 
 std::unordered_map<std::string, Function> SemanticAnalyzer::Analyze(std::unordered_map<std::string, Function> functions)
@@ -10,28 +10,34 @@ std::unordered_map<std::string, Function> SemanticAnalyzer::Analyze(std::unorder
   for (auto &pair : functions)
   {
     Function f = pair.second;
-    TraverseAst(f.RootNode(), BIND(TransformArithmeticInstructions));
+    TraverseAst(f.RootNode(), BIND(TransformInbuiltFunctions));
   }
   return functions;
 }
 
 
-// transform ast so that arithmetic functions have only 2 children (eg. (- 2 3 4 5) is transformed to (-(-(- 2 3) 4 ) 5).
-void SemanticAnalyzer::TransformArithmeticInstructions(Ast_Node &node)
+// transform AST so that arithmetic functions have only 2 children (eg. (- 2 3 4 5) is transformed to (-(-(- 2 3) 4 ) 5).
+void SemanticAnalyzer::TransformInbuiltFunctions(Ast_Node &node)
 {
-  std::set<std::string> arithmetic_functions = { "+", "-", "/", "*" };
+
+  // name - maximum number of children in the leaf node
+  std::map<std::string, int> functions = { { FN_ADD, 2 }, { FN_SUB, 2 }, { FN_MUL, 2 }, { FN_DIV, 2 }, { FN_PRINT, 1 }, { FN_PRINTLN, 1 } };
+
   if (node->Type() != NodeType::FUNCTION_CALL)
   {
     return;
   }
 
-  if (arithmetic_functions.count(node->ValueAsText()) != 0)
+  if (functions.count(node->ValueAsText()) != 0)
   {
+
+    size_t child_limit = functions[node->ValueAsText()];
+    
     auto parent = node->Parent();
 
     Ast_Node current_node = node;
 
-    while (node->Children().size() > 2)
+    while (node->Children().size() > child_limit)
     {
 
       auto new_node = std::make_shared<AstNode>(NodeType::FUNCTION_CALL);
@@ -39,7 +45,7 @@ void SemanticAnalyzer::TransformArithmeticInstructions(Ast_Node &node)
       new_node->AddChild(current_node);
 
 
-      auto right_child = node->Children()[2];
+      auto right_child = node->Children()[child_limit];
       node->RemoveChild(right_child);
       new_node->AddChild(right_child);
 
@@ -50,4 +56,5 @@ void SemanticAnalyzer::TransformArithmeticInstructions(Ast_Node &node)
     parent->ReplaceChild(node, current_node);
   }
 }
+
 

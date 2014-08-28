@@ -7,5 +7,5 @@
 class SemanticAnalyzer {
 public:
   std::unordered_map<std::string, Function> Analyze(std::unordered_map<std::string, Function> functions);
-  void TransformArithmeticInstructions(Ast_Node &node);
+  void TransformInbuiltFunctions(Ast_Node &node);
 };
