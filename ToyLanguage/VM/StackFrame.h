@@ -19,6 +19,12 @@ public:
     return m_instruction_pointer++;
   }
 
+
+  bool StackIsEmpty()
+  {
+    return m_operand_stack.empty();
+  }
+
   VMObject Pop() 
   {
     if (m_operand_stack.empty())

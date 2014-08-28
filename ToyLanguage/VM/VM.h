@@ -23,6 +23,11 @@ public:
     return ret;
   }
 
+  StackFrame &CurrentFrame()
+  {
+    return m_frames.back();
+  }
+
 private:
   bool m_running = true;
   int m_frame_pointer;

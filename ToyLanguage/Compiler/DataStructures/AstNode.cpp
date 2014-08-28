@@ -1,6 +1,6 @@
 #include "AstNode.h"
 
-AstNode::AstNode(NodeType type) : m_type(type), m_release_char(false)
+AstNode::AstNode(NodeType type, int line) : m_type(type), m_release_char(false), m_declaration_line(line)
 {
 }
 

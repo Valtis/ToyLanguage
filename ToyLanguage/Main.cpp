@@ -5,6 +5,7 @@
 #include "Compiler/DataStructures/AstNode.h"
 #include "Compiler/Parser/ParseError.h"
 #include "Compiler/SemanticAnalyzer/SemanticAnalyzer.h"
+#include "Compiler/SemanticAnalyzer/SemanticError.h"
 #include "Compiler/CodeGen/CodeGenerator.h"
 
 #include "VM/VM.h"
@@ -115,9 +116,10 @@ int main()
     std::cout << "  >>> " << tokens.first[ex.LineNumber() - 1] << "\n";
     std::cout << ex.what() << "\n";
   }
-  catch (const std::logic_error &ex)
+  catch (const SemanticError &ex)
   {
-    std::cout << "Internal error\n";
+    std::cout << "Semantic error at line " + std::to_string(ex.LineNumber()) + "\n";
+    std::cout << "  >>> " << tokens.first[ex.LineNumber() - 1] << "\n";
     std::cout << ex.what() << "\n";
   }
   catch (const std::exception &ex)

@@ -60,7 +60,19 @@ void CallFunction(VM *vm, StackFrame &frame)
 
 void Return(VM *vm, StackFrame &frame)
 {
+  std::vector<VMObject> objects;
+  while (!frame.StackIsEmpty())
+  {
+    objects.push_back(Pop(frame));
+  }
+
   vm->PopFrame();
+  
+  for (auto it = objects.rbegin(); it != objects.rend(); ++it) 
+  { 
+    Push(vm->CurrentFrame(), *it);
+  }
+  
 }
 
 

@@ -89,10 +89,10 @@ void Parser::ParseFunctionBody(Function &f)
 {
   Expect(TokenType::LPAREN);
 
-  auto root_node = std::make_shared<AstNode>(NodeType::ROOT);
+  auto root_node = std::make_shared<AstNode>(NodeType::ROOT, CurrentToken().LineNumber());
   if (CurrentToken().Type() == TokenType::IDENT)
   {
-    auto call_node = std::make_shared<AstNode>(NodeType::FUNCTION_CALL);
+    auto call_node = std::make_shared<AstNode>(NodeType::FUNCTION_CALL, CurrentToken().LineNumber());
     root_node->AddChild(call_node);
     call_node->ValueAsText(CurrentToken().Value());
     ParseFunctionCall(f, call_node);
@@ -123,7 +123,7 @@ void Parser::ParseFunctionCall(Function & f, Ast_Node node)
     if (CurrentToken().Type() == TokenType::LPAREN)
     {
       NextToken();
-      auto call_node = std::make_shared<AstNode>(NodeType::FUNCTION_CALL);
+      auto call_node = std::make_shared<AstNode>(NodeType::FUNCTION_CALL, CurrentToken().LineNumber());
       node->AddChild(call_node);
       call_node->ValueAsText(CurrentToken().Value());
       ParseFunctionCall(f, call_node);
@@ -131,10 +131,17 @@ void Parser::ParseFunctionCall(Function & f, Ast_Node node)
 
     else if (CurrentToken().Type() == TokenType::NUMBER)
     {
-      auto call_node = std::make_shared<AstNode>(NodeType::NUMBER);
+      auto call_node = std::make_shared<AstNode>(NodeType::NUMBER, CurrentToken().LineNumber());
       call_node->ValueAsNumber(CurrentToken().Value());
       node->AddChild(call_node);
 
+    }
+    else if (CurrentToken().Type() == TokenType::IDENT && m_functions.count(CurrentToken().Value()) != 0)
+    {
+      auto call_node = std::make_shared<AstNode>(NodeType::FUNCTION_CALL, CurrentToken().LineNumber());
+
+      call_node->ValueAsText(CurrentToken().Value());
+      node->AddChild(call_node);
     }
     else
     {

@@ -3,6 +3,7 @@
 #include <map>
 #include "../../Utility/AstFunctions.h"
 #include "../FunctionDefines.h"
+#include "SemanticError.h"
 #define BIND(NAME__) std::bind(&SemanticAnalyzer::NAME__, this, std::placeholders::_1)
 
 std::unordered_map<std::string, Function> SemanticAnalyzer::Analyze(std::unordered_map<std::string, Function> functions)
@@ -31,8 +32,15 @@ void SemanticAnalyzer::TransformInbuiltFunctions(Ast_Node &node)
   if (functions.count(node->ValueAsText()) != 0)
   {
 
+
     size_t child_limit = functions[node->ValueAsText()];
     
+
+    if (node->Children().size() < child_limit)
+    {
+      throw ParameterCountMismatchError("Function " + node->ValueAsText() + " requires at least " + std::to_string(child_limit) + " arguments", node->DeclarationLine());
+    }
+
     auto parent = node->Parent();
 
     Ast_Node current_node = node;
@@ -40,7 +48,7 @@ void SemanticAnalyzer::TransformInbuiltFunctions(Ast_Node &node)
     while (node->Children().size() > child_limit)
     {
 
-      auto new_node = std::make_shared<AstNode>(NodeType::FUNCTION_CALL);
+      auto new_node = std::make_shared<AstNode>(NodeType::FUNCTION_CALL, node->DeclarationLine());
       new_node->ValueAsText(node->ValueAsText());
       new_node->AddChild(current_node);
 

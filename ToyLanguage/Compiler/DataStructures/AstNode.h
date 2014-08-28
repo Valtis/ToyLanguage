@@ -20,7 +20,7 @@ typedef std::shared_ptr < AstNode > Ast_Node;
 class AstNode
 {
 public:
-  AstNode(NodeType type);
+  AstNode(NodeType type, int line);
 
 
   ~AstNode();
@@ -100,9 +100,14 @@ public:
     m_release_char = true;
   }
 
-  std::string ValueAsText()
+  std::string ValueAsText() const
   {
     return std::string(m_value.text);
+  }
+
+  int DeclarationLine() const
+  {
+    return m_declaration_line;
   }
   
 private:
@@ -114,6 +119,7 @@ private:
   bool m_release_char;
   std::vector<Ast_Node> m_children;
   NodeValue m_value;
+  int m_declaration_line;
 
 };
 
