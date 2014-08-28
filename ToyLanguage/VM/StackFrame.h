@@ -27,10 +27,6 @@ public:
 
   VMObject Pop() 
   {
-    if (m_operand_stack.empty())
-    {
-      throw StackUnderFlowError("Stack underflow");
-    }
     auto top = m_operand_stack.back();
     m_operand_stack.pop_back();
     return top;
@@ -41,9 +37,20 @@ public:
     m_operand_stack.push_back(o);
   }
 
+  void AddVariable(const VMObject &o)
+  {
+    m_local_variables.push_back(o);
+  }
+
+  VMObject &GetVariable(const int id)
+  {
+    return m_local_variables[id];
+  }
+
 private:
   int m_functionID;
   int m_instruction_pointer;
   std::vector<VMObject> m_operand_stack;
+  std::vector<VMObject> m_local_variables;
 };
 

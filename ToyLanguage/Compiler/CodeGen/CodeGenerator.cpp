@@ -3,45 +3,36 @@
 #include "../../Utility/AstFunctions.h"
 #include "../FunctionDefines.h"
 
-std::unordered_map<int, VMFunction> CodeGenerator::GenerateCode(const std::unordered_map<std::string, Function> functions)
+CodeGenerator::CodeGenerator(const std::unordered_map<std::string, Function> functions, 
+  std::unordered_map<std::string, int> function_name_ids) : m_functions(functions), m_function_names_to_ids(function_name_ids)
 {
 
+}
+
+std::unordered_map<int, VMFunction> CodeGenerator::GenerateCode()
+{
 
   std::unordered_map< int, VMFunction > vm_functions;
-  m_function_names_to_ids["main"] = MAIN_FUNCTION_ID;
-
-  int current_id = 1;
-  for (auto pair : functions)
+  
+  for (auto pair : m_functions)
   {
     Function f = pair.second;
-    if (pair.first == "main")
-    {
-      vm_functions[MAIN_FUNCTION_ID] = GenerateCodeForFunction(f);
-      vm_functions[MAIN_FUNCTION_ID].AddByteCode(ByteCode{ Instruction::STOP, nullptr });
-    }
-    else
-    {
-      m_function_names_to_ids[pair.first] = current_id;
-      vm_functions[current_id] = GenerateCodeForFunction(f);
-
-      vm_functions[current_id].AddByteCode(ByteCode{ Instruction::RETURN, nullptr });
-      ++current_id;
-    }
+    vm_functions[m_function_names_to_ids[pair.first]] = GenerateCodeForFunction(pair.first, f);
   }
   return vm_functions;
 }
 
-VMFunction CodeGenerator::GenerateCodeForFunction(Function &f)
+VMFunction CodeGenerator::GenerateCodeForFunction(const std::string &current_function_name, Function &f)
 {
-  VMFunction vm_function;
+  VMFunction vm_function(f.ParameterCount());
 
-  TraverseAst(f.RootNode(), [&vm_function, this](Ast_Node &node){ this->Generator(node, vm_function); });
+  TraverseAst(f.RootNode(), [&vm_function, &current_function_name, this](Ast_Node &node){ this->Generator(node, vm_function, current_function_name); });
 
   return vm_function;
 }
 
 
-void CodeGenerator::Generator(const Ast_Node &node, VMFunction &vm_function)
+void CodeGenerator::Generator(const Ast_Node &node, VMFunction &vm_function, const std::string &current_function_name)
 {
   switch (node->Type())
   {
@@ -53,7 +44,12 @@ void CodeGenerator::Generator(const Ast_Node &node, VMFunction &vm_function)
     GenerateFunctionCallInstruction(node, vm_function);
     break;
 
+  case NodeType::VARIABLE:
+    GenerateVariableReadInstruction(node, vm_function);
+    break;
+
   case NodeType::ROOT:
+    GenerateReturnOrStopInstruction(current_function_name, vm_function);
   default:
     break;
   }
@@ -91,3 +87,25 @@ void CodeGenerator::GenerateFunctionCallInstruction(const Ast_Node & node, VMFun
 
 }
 
+
+void CodeGenerator::GenerateVariableReadInstruction(const Ast_Node & node, VMFunction & vm_function)
+{
+  auto o = new VMObject;
+  o->type = VMObjectType::INTEGER;
+  o->value.integer = node->ValueAsInteger();
+  vm_function.AddByteCode(ByteCode{ Instruction::PUSH_VARIABLE, o });
+}
+
+
+
+void CodeGenerator::GenerateReturnOrStopInstruction(const std::string &current_function_name, VMFunction & vm_function)
+{
+  if (current_function_name == "main")
+  {
+    vm_function.AddByteCode(ByteCode{ Instruction::STOP, nullptr });
+  } 
+  else
+  {
+    vm_function.AddByteCode(ByteCode{ Instruction::RETURN, nullptr });
+  }
+}

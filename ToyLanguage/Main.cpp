@@ -61,10 +61,10 @@ int main()
     Parser parser(tokens);
 
     auto functions = parser.Parse();
+    
 
 
-
-    std::cout << "Before semantic analysis:----------------\n\n";
+    /*std::cout << "Before semantic analysis:----------------\n\n";
     for (auto f : functions)
     {
       std::cout << "  Function: " << f.second.Name() << "\tDeclared at line: " << f.second.DeclarationLine() << "\t\n";
@@ -72,13 +72,13 @@ int main()
       std::cout << "\n\n";
 
     }
+    */
 
-
-    SemanticAnalyzer analyzer;
-    functions = analyzer.Analyze(functions);
+    SemanticAnalyzer analyzer(functions);
+    functions = analyzer.Analyze();
       
     
-    std::cout << "\nAfter semantic analysis:----------------\n\n";
+   /* std::cout << "\nAfter semantic analysis:----------------\n\n";
     for (auto f : functions)
     {
       std::cout << "  Function: " << f.second.Name() << "\tDeclared at line: " << f.second.DeclarationLine() << "\t\n";
@@ -87,18 +87,23 @@ int main()
 
     }
 
+    std::cout << "\nName-id-pairs:\n";
+    for (auto nameid : analyzer.UserFunctionIds())
+    {
+      std::cout << "Function name: " << nameid.first << "\tID: " << nameid.second << "\n";
+    }
+
+    */
 
 
-
-    CodeGenerator generator;
-    auto code = generator.GenerateCode(functions);
-    
-    
+    CodeGenerator generator(functions, analyzer.UserFunctionIds());
+    auto code = generator.GenerateCode();
+  
 
     VM vm;
-    std::cout << "\nInitializing VM...\n";
+ //   std::cout << "\nInitializing VM...\n";
     vm.Initialize(code);
-    std::cout << "Executing program...\n";
+ //   std::cout << "Executing program...\n";
     vm.Execute();
   }
   catch (const InvalidTokenError &ex)
@@ -144,6 +149,8 @@ std::string node_name(NodeType type)
     return "Number";
   case NodeType::ROOT:
     return "Root";
+  case NodeType::VARIABLE:
+    return "Variable";
   default:
     return "TBD";
   }
@@ -155,6 +162,8 @@ std::string node_value(const Ast_Node &node)
   {
   case NodeType::NUMBER:
     return std::to_string(node->ValueAsNumber());
+  case NodeType::VARIABLE:
+    return std::to_string(node->ValueAsInteger());
   case NodeType::FUNCTION_CALL:
     return node->ValueAsText();
   default:

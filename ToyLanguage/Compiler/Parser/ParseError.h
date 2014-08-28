@@ -37,5 +37,5 @@ PARSE_ERROR(UndefinedMainError)
 PARSE_ERROR(UndefinedFunctionCall)
 PARSE_ERROR(FunctionRedeclarationError)
 PARSE_ERROR(InvalidTokenError)
-
-
+PARSE_ERROR(ParameterShadowsFunctionError)
+PARSE_ERROR(FunctionParameterRedeclarationError)

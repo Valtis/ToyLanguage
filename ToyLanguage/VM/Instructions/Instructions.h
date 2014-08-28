@@ -16,4 +16,5 @@ void Print(StackFrame &frame);
 void PrintLine(StackFrame &frame);
 
 void Push(StackFrame &frame, const VMObject &o);
+void PushVariable(StackFrame &frame, const VMObject &o);
 VMObject Pop(StackFrame &frame);

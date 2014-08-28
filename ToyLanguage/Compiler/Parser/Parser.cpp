@@ -78,11 +78,30 @@ void Parser::ParseFunctionArguments(Function &f)
   Expect(TokenType::LPAREN);
 
   while (CurrentToken().Type() == TokenType::IDENT) {
+    std::string name = CurrentToken().Value();
+    CheckIfParameterShadowsFunction(name);
+    if (f.HasParameter(name))
+    {
+      throw FunctionParameterRedeclarationError("Redeclaration of parameter '" + name + "' for function '" + f.Name() + "'", CurrentToken().LineNumber());
+    }
+
+    f.AddParameter(CurrentToken().Value());
     NextToken();
   }
 
   Expect(TokenType::RPAREN);
 }
+
+
+
+void Parser::CheckIfParameterShadowsFunction(std::string parameterName)
+{
+  if (m_functions.count(parameterName) != 0 || m_inbuilt_functions.count(parameterName) != 0)
+  {
+    throw ParameterShadowsFunctionError("Parameter '" + parameterName + "' shadows a function with same name", CurrentToken().LineNumber());
+  }
+}
+
 
 
 void Parser::ParseFunctionBody(Function &f)
@@ -116,7 +135,7 @@ void Parser::ParseFunctionCall(Function & f, Ast_Node node)
   NextToken();
 
 
-
+  // REFACTOOOOR
   while (CurrentToken().Type() != TokenType::RPAREN)
   {
 
@@ -131,9 +150,9 @@ void Parser::ParseFunctionCall(Function & f, Ast_Node node)
 
     else if (CurrentToken().Type() == TokenType::NUMBER)
     {
-      auto call_node = std::make_shared<AstNode>(NodeType::NUMBER, CurrentToken().LineNumber());
-      call_node->ValueAsNumber(CurrentToken().Value());
-      node->AddChild(call_node);
+      auto number_node = std::make_shared<AstNode>(NodeType::NUMBER, CurrentToken().LineNumber());
+      number_node->ValueAsNumber(CurrentToken().Value());
+      node->AddChild(number_node);
 
     }
     else if (CurrentToken().Type() == TokenType::IDENT && m_functions.count(CurrentToken().Value()) != 0)
@@ -142,6 +161,12 @@ void Parser::ParseFunctionCall(Function & f, Ast_Node node)
 
       call_node->ValueAsText(CurrentToken().Value());
       node->AddChild(call_node);
+    }
+    else if (CurrentToken().Type() == TokenType::IDENT && f.HasParameter(CurrentToken().Value()))
+    {
+      auto variable_node = std::make_shared<AstNode>(NodeType::VARIABLE, CurrentToken().LineNumber());
+      variable_node->ValueAsInteger(f.ParameterID(CurrentToken().Value()));
+      node->AddChild(variable_node);
     }
     else
     {

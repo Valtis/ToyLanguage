@@ -59,6 +59,9 @@ void VM::Execute()
     case Instruction::PUSH:
       Push(m_frames.back(), *code.GetObject());
       break;
+    case Instruction::PUSH_VARIABLE:
+      PushVariable(m_frames.back(), *code.GetObject());
+      break;
 
     default:
       throw UndefinedInstructionError(std::string("Instruction ") + std::to_string(static_cast<int>(code.GetInstruction())) + " was not recognized by the virtual machine");

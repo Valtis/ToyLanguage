@@ -2,7 +2,7 @@
 #include <cstdint>
 #include "VMObject.h"
 
-enum class Instruction : std::uint8_t { NOP, ADD, SUB, MUL, DIV, STOP, PUSH, POP, CALLFUNCTION, RETURN,  PRINT, PRINTLINE };
+enum class Instruction : std::uint8_t { NOP, ADD, SUB, MUL, DIV, STOP, PUSH, PUSH_VARIABLE, POP, CALLFUNCTION, RETURN, PRINT, PRINTLINE };
 
 
 

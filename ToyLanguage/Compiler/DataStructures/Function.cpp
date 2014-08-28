@@ -1,7 +1,7 @@
 #include "Function.h"
 
 
-Function::Function() : m_name(""), m_declaration_line(0), m_root_node(nullptr)
+Function::Function() : m_name(""), m_declaration_line(0),  m_root_node(nullptr)
 {
 
 }

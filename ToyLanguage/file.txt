@@ -1,6 +1,10 @@
-(fn arith-value () (+ 2 3 (*2 1) 0.5))  
-(fn arith-value-2 () (- 2.3 0.5))
- 
+(fn foo (a b) (+ (* a 2) b))
+(fn bar () (println (foo 4 0.5)))
+  
 (fn main ()
-  (println arith-value arith-value-2)
+	(bar)
 )
+
+
+
+

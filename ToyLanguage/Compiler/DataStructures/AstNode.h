@@ -7,12 +7,13 @@
 class AstNode;
 
 
-enum class NodeType { ROOT, FUNCTION_CALL, NUMBER };
+enum class NodeType { ROOT, FUNCTION_CALL, NUMBER, VARIABLE };
 
 union NodeValue
 {
   double number;
   char *text;
+  int integer;
 };
 
 typedef std::shared_ptr < AstNode > Ast_Node;
@@ -76,6 +77,16 @@ public:
     return m_type;
   }
 
+  void ValueAsInteger(int value)
+  {
+    MaybeReleaseMemory();
+    m_value.integer = value;
+  }
+
+  int ValueAsInteger()
+  {
+    return m_value.integer;
+  }
   void ValueAsNumber(const std::string &number)
   {
     MaybeReleaseMemory();

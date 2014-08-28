@@ -28,6 +28,11 @@ public:
     return m_frames.back();
   }
 
+  VMFunction &Function(int id)
+  {
+    return m_functions[id];
+  }
+
 private:
   bool m_running = true;
   int m_frame_pointer;

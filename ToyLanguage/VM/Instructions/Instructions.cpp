@@ -3,21 +3,27 @@
 #include "..\StackFrame.h"
 #include "..\VMObject.h"
 #include "..\VM.h"
+#include "..\VMError.h"
 
 #include <functional>
 #include <cstdio>
-void TwoOperandOperationWithResult(StackFrame &frame, VMObject(*operation)(const VMObject &, const VMObject &))
+void ArithmeticHelper(StackFrame &frame, VMObject(*operation)(const VMObject &, const VMObject &))
 { 
 
   VMObject second = Pop(frame);
   VMObject first = Pop(frame);
+
+  if (second.type != VMObjectType::NUMBER || first.type != VMObjectType::NUMBER)
+  {
+    throw InvalidOperandError("Invalid operand for arithmetic operation: number expected");
+  }
   
   Push(frame, operation(first, second));
 }
 
 void Add(StackFrame &frame)
 {
-  TwoOperandOperationWithResult(frame, [](const VMObject &first, const VMObject &second) { 
+  ArithmeticHelper(frame, [](const VMObject &first, const VMObject &second) { 
     VMObject o = first;
     o.value.number += second.value.number;
     return o;
@@ -26,7 +32,7 @@ void Add(StackFrame &frame)
 
 void Sub(StackFrame &frame)
 {
-  TwoOperandOperationWithResult(frame, [](const VMObject &first, const VMObject &second) {
+  ArithmeticHelper(frame, [](const VMObject &first, const VMObject &second) {
     VMObject o = first;
     o.value.number -= second.value.number;
     return o;
@@ -35,7 +41,7 @@ void Sub(StackFrame &frame)
 
 void Mul(StackFrame &frame)
 {
-  TwoOperandOperationWithResult(frame, [](const VMObject &first, const VMObject &second) {
+  ArithmeticHelper(frame, [](const VMObject &first, const VMObject &second) {
     VMObject o = first;
     o.value.number *= second.value.number;
     return o;
@@ -44,7 +50,7 @@ void Mul(StackFrame &frame)
 
 void Div(StackFrame &frame)
 {
-  TwoOperandOperationWithResult(frame, [](const VMObject &first, const VMObject &second) {
+  ArithmeticHelper(frame, [](const VMObject &first, const VMObject &second) {
     VMObject o = first;
     o.value.number /= second.value.number;
     return o;
@@ -53,8 +59,24 @@ void Div(StackFrame &frame)
 
 void CallFunction(VM *vm, StackFrame &frame)
 {
-  VMObject new_function_id = Pop(frame);
-  StackFrame new_frame(new_function_id.value.integer);
+  int new_function_id = Pop(frame).value.integer;
+  
+  StackFrame new_frame(new_function_id);
+
+  VMFunction f = vm->Function(new_function_id);
+  std::vector<VMObject> parameters;
+  for (int i = 0; i < f.ParameterCount(); ++i)
+  {
+    parameters.push_back(Pop(vm->CurrentFrame()));
+  }
+
+  for (auto it = parameters.rbegin(); it < parameters.rend(); ++it)
+  {
+    new_frame.AddVariable(*it);
+  }
+
+
+
   vm->PushFrame(new_frame);
 }
 
@@ -86,6 +108,12 @@ void PrintLine(StackFrame &frame)
 {
   VMObject o = Pop(frame);
   puts(as_string(o).c_str());
+}
+
+void PushVariable(StackFrame &frame, const VMObject &o)
+{
+  int variable_id = o.value.integer;
+  Push(frame, frame.GetVariable(variable_id));
 }
 
 void Push(StackFrame &frame, const VMObject &o)
