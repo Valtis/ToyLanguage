@@ -1,6 +1,6 @@
 (fn foo (a b) (+ (* a 2) b))
 (fn bar () (println (foo 4 0.5)))
-  
+   
 (fn main ()
 	(bar)
 )

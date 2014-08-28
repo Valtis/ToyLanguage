@@ -127,7 +127,7 @@ void Parser::ParseFunctionBody(Function &f)
 void Parser::ParseFunctionCall(Function & f, Ast_Node node)
 {
 
-  if (m_functions.count(CurrentToken().Value()) == 0 && m_inbuilt_functions.count(CurrentToken().Value()) == 0)
+  if (m_functions.count(CurrentToken().Value()) == 0 && m_inbuilt_functions.count(CurrentToken().Value()) == 0 && CurrentToken().Value() != f.Name())
   {
     throw UndefinedFunctionCall("Call to undefined function " + CurrentToken().Value(), CurrentToken().LineNumber());
   }
