@@ -2,7 +2,13 @@
 #include <iostream>
 #include "Compiler/Lexer.h"
 #include "Compiler/Parser/Parser.h"
-#include "Compiler/DataStructures/AstNode.h"
+#include "Compiler/DataStructures/AstNodes/RootNode.h"
+#include "Compiler/DataStructures/AstNodes/NumberNode.h"
+#include "Compiler/DataStructures/AstNodes/VariableReadNode.h"
+#include "Compiler/DataStructures/AstNodes/FunctionCallNode.h"
+
+
+#include "Compiler/DataStructures/AstNodes/AstVisitor.h"
 #include "Compiler/Parser/ParseError.h"
 #include "Compiler/SemanticAnalyzer/SemanticAnalyzer.h"
 #include "Compiler/SemanticAnalyzer/SemanticError.h"
@@ -63,22 +69,22 @@ int main()
     auto functions = parser.Parse();
     
 
-
-    /*std::cout << "Before semantic analysis:----------------\n\n";
+    /*
+    std::cout << "Before semantic analysis:----------------\n\n";
     for (auto f : functions)
     {
       std::cout << "  Function: " << f.second.Name() << "\tDeclared at line: " << f.second.DeclarationLine() << "\t\n";
       TraverseAst(f.second.RootNode());
       std::cout << "\n\n";
 
-    }
-    */
+    }*/
+    
 
     SemanticAnalyzer analyzer(functions);
     functions = analyzer.Analyze();
       
     
-   /* std::cout << "\nAfter semantic analysis:----------------\n\n";
+  /*  std::cout << "\nAfter semantic analysis:----------------\n\n";
     for (auto f : functions)
     {
       std::cout << "  Function: " << f.second.Name() << "\tDeclared at line: " << f.second.DeclarationLine() << "\t\n";
@@ -91,9 +97,9 @@ int main()
     for (auto nameid : analyzer.UserFunctionIds())
     {
       std::cout << "Function name: " << nameid.first << "\tID: " << nameid.second << "\n";
-    }
+    }*/
 
-    */
+    
 
 
     CodeGenerator generator(functions, analyzer.UserFunctionIds());
@@ -139,37 +145,57 @@ int main()
 
 
 
-std::string node_name(NodeType type)
-{
-  switch (type)
-  {
-  case NodeType::FUNCTION_CALL:
-    return "Function call";
-  case NodeType::NUMBER:
-    return "Number";
-  case NodeType::ROOT:
-    return "Root";
-  case NodeType::VARIABLE:
-    return "Variable";
-  default:
-    return "TBD";
-  }
-}
 
-std::string node_value(const Ast_Node &node)
+
+
+class AstNamePrinter : public AstVisitor
 {
-  switch (node->Type())
+public:
+  void visit(VariableReadNode *node)
   {
-  case NodeType::NUMBER:
-    return std::to_string(node->ValueAsNumber());
-  case NodeType::VARIABLE:
-    return std::to_string(node->ValueAsInteger());
-  case NodeType::FUNCTION_CALL:
-    return node->ValueAsText();
-  default:
-    return "";
+    std::cout << "Variable";
   }
-}
+
+  void visit(RootNode *node)
+  {
+    std::cout << "Root";
+  }  
+
+  void visit(NumberNode *node)
+  {
+    std::cout << "Number";
+  }  
+  
+  void visit(FunctionCallNode *node)
+  {
+    std::cout << "Function call";
+  }
+};
+
+class AstValuePrinter : public AstVisitor
+{
+public:
+  void visit(VariableReadNode *node)
+  {
+    std::cout << node->VariableId();
+  }
+
+  void visit(RootNode *node)
+  {
+    
+  }
+
+  void visit(NumberNode *node)
+  {
+    std::cout << node->Value();
+  }
+
+  void visit(FunctionCallNode *node)
+  {
+    std::cout << node->Name();
+  }
+};
+
 
 void TraverseAst(const Ast_Node &node, int level)
 {
@@ -183,7 +209,18 @@ void TraverseAst(const Ast_Node &node, int level)
   {
     spaces += "  ";
   }
-  std::cout << spaces << "Node type: " << node_name(node->Type()) << "\t" << spaces << "Node value: " << node_value(node) << "\n";
+
+
+  std::string name;
+  AstNamePrinter name_printer;
+  AstValuePrinter value_printer;
+
+  std::cout << spaces << "Node type: "; 
+  node->accept(&name_printer);
+  std::cout << "\t" << spaces << "Node value: "; 
+  
+  node->accept(&value_printer);
+  std::cout << "\n";
 
   for (auto child : node->Children())
   {

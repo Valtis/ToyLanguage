@@ -1,5 +1,4 @@
 #pragma once
-#include <functional>
-#include "../Compiler/DataStructures/AstNode.h"
-
-void TraverseAst(Ast_Node &node, const std::function<void(Ast_Node &node)> &transformer);
+#include "../Compiler/DataStructures/AstNodes/AstNode.h"
+#include "../Compiler/DataStructures/AstNodes/AstVisitor.h"
+void TraverseAst(Ast_Node &node, AstVisitor *visitor);

@@ -3,7 +3,7 @@
 #include <string>
 #include <algorithm>
 #include <memory>
-#include "AstNode.h"
+#include "AstNodes/AstNode.h"
 
 class Function
 {

@@ -1,8 +1,12 @@
 #include "Parser.h"
 #include "ParseError.h"
+
+#include "../DataStructures/AstNodes/NodeCreation.h"
+
 #include "../FunctionDefines.h"
 
-Parser::Parser(std::pair<std::vector<std::string>, std::vector<Token>> &tokens) : m_lines(tokens.first), m_tokens(tokens.second), m_current_token(m_tokens.begin())
+Parser::Parser(std::pair<std::vector<std::string>, std::vector<Token>> &tokens) : m_lines(tokens.first), 
+  m_tokens(tokens.second), m_current_token(m_tokens.begin())
 {
   token_to_string[TokenType::FUNCTION] = "function declaration";
   token_to_string[TokenType::WHILE] = "while";
@@ -82,7 +86,8 @@ void Parser::ParseFunctionArguments(Function &f)
     CheckIfParameterShadowsFunction(name);
     if (f.HasParameter(name))
     {
-      throw FunctionParameterRedeclarationError("Redeclaration of parameter '" + name + "' for function '" + f.Name() + "'", CurrentToken().LineNumber());
+      throw FunctionParameterRedeclarationError("Redeclaration of parameter '" + name + "' for function '" + f.Name() + "'", 
+        CurrentToken().LineNumber());
     }
 
     f.AddParameter(CurrentToken().Value());
@@ -98,7 +103,8 @@ void Parser::CheckIfParameterShadowsFunction(std::string parameterName)
 {
   if (m_functions.count(parameterName) != 0 || m_inbuilt_functions.count(parameterName) != 0)
   {
-    throw ParameterShadowsFunctionError("Parameter '" + parameterName + "' shadows a function with same name", CurrentToken().LineNumber());
+    throw ParameterShadowsFunctionError("Parameter '" + parameterName + "' shadows a function with same name", 
+      CurrentToken().LineNumber());
   }
 }
 
@@ -108,12 +114,12 @@ void Parser::ParseFunctionBody(Function &f)
 {
   Expect(TokenType::LPAREN);
 
-  auto root_node = std::make_shared<AstNode>(NodeType::ROOT, CurrentToken().LineNumber());
+  auto root_node = CreateRootNode(CurrentToken().LineNumber());
+
   if (CurrentToken().Type() == TokenType::IDENT)
   {
-    auto call_node = std::make_shared<AstNode>(NodeType::FUNCTION_CALL, CurrentToken().LineNumber());
+    auto call_node = CreateFunctionCallNode(CurrentToken().LineNumber(), CurrentToken().Value());
     root_node->AddChild(call_node);
-    call_node->ValueAsText(CurrentToken().Value());
     ParseFunctionCall(f, call_node);
   }
 
@@ -127,7 +133,8 @@ void Parser::ParseFunctionBody(Function &f)
 void Parser::ParseFunctionCall(Function & f, Ast_Node node)
 {
 
-  if (m_functions.count(CurrentToken().Value()) == 0 && m_inbuilt_functions.count(CurrentToken().Value()) == 0 && CurrentToken().Value() != f.Name())
+  if (m_functions.count(CurrentToken().Value()) == 0 && m_inbuilt_functions.count(CurrentToken().Value()) == 0 && 
+    CurrentToken().Value() != f.Name())
   {
     throw UndefinedFunctionCall("Call to undefined function " + CurrentToken().Value(), CurrentToken().LineNumber());
   }
@@ -138,42 +145,39 @@ void Parser::ParseFunctionCall(Function & f, Ast_Node node)
   // REFACTOOOOR
   while (CurrentToken().Type() != TokenType::RPAREN)
   {
-
+    // function call with parameters
     if (CurrentToken().Type() == TokenType::LPAREN)
     {
       NextToken();
-      auto call_node = std::make_shared<AstNode>(NodeType::FUNCTION_CALL, CurrentToken().LineNumber());
+      if (CurrentToken().Type() != TokenType::IDENT)
+      {
+        throw UnexpectedTokenError("Invalid function name '" + CurrentToken().Value() + "'", CurrentToken().LineNumber());
+      }
+
+      auto call_node = CreateFunctionCallNode(CurrentToken().LineNumber(), CurrentToken().Value());
       node->AddChild(call_node);
-      call_node->ValueAsText(CurrentToken().Value());
       ParseFunctionCall(f, call_node);
-    }
-
-    else if (CurrentToken().Type() == TokenType::NUMBER)
-    {
-      auto number_node = std::make_shared<AstNode>(NodeType::NUMBER, CurrentToken().LineNumber());
-      number_node->ValueAsNumber(CurrentToken().Value());
-      node->AddChild(number_node);
-
-    }
+    } // function call without parameters
     else if (CurrentToken().Type() == TokenType::IDENT && m_functions.count(CurrentToken().Value()) != 0)
     {
-      auto call_node = std::make_shared<AstNode>(NodeType::FUNCTION_CALL, CurrentToken().LineNumber());
-
-      call_node->ValueAsText(CurrentToken().Value());
+      auto call_node = CreateFunctionCallNode(CurrentToken().LineNumber(), CurrentToken().Value());
       node->AddChild(call_node);
-    }
+    } // variable
     else if (CurrentToken().Type() == TokenType::IDENT && f.HasParameter(CurrentToken().Value()))
     {
-      auto variable_node = std::make_shared<AstNode>(NodeType::VARIABLE, CurrentToken().LineNumber());
-      variable_node->ValueAsInteger(f.ParameterID(CurrentToken().Value()));
+      auto variable_node = CreateVariableReadNode(CurrentToken().LineNumber(), f.ParameterID(CurrentToken().Value()));
       node->AddChild(variable_node);
+    }
+    else if (CurrentToken().Type() == TokenType::NUMBER)
+    {
+      auto number_node = CreateNumberNode(CurrentToken().LineNumber(), std::stod(CurrentToken().Value()));
+      node->AddChild(number_node);
     }
     else
     {
       throw UnexpectedTokenError("Unexpected token " + CurrentToken().Value(), CurrentToken().LineNumber());
     }
     NextToken();
-
   }
 
 }
