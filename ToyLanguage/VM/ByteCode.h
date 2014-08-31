@@ -2,41 +2,36 @@
 #include <cstdint>
 #include "VMObject.h"
 
-enum class Instruction : std::uint8_t { NOP, ADD, SUB, MUL, DIV, STOP, PUSH, PUSH_VARIABLE, POP, CALLFUNCTION, RETURN, PRINT, PRINTLINE };
-
-
-
+enum class Instruction : std::uint8_t { NOP, ADD, SUB, MUL, DIV, STOP, PUSH, PUSH_VARIABLE, POP, CALLFUNCTION, RETURN, PRINT, PRINTLINE, JUMP_IF_TRUE, JUMP_IF_FALSE, JUMP, COMPARE };
 
 class ByteCode
 {
 public:
-  ByteCode() : instruction(Instruction::NOP), object(nullptr)
+  ByteCode() : instruction(Instruction::NOP)
+  {
+    object.type = VMObjectType::NONE;
+  }
+
+  ByteCode(Instruction i) : instruction(i)
+  {
+    object.type = VMObjectType::NONE;
+  }
+
+  ByteCode(Instruction i, VMObject o) : instruction(i), object(o)
   {
 
   }
 
-  ByteCode(Instruction i, VMObject *o) : instruction(i), object(o)
+  void ReplaceInstruction(Instruction i)
   {
-
+    instruction = i;
+    object.type = VMObjectType::NONE;
   }
 
-  ByteCode(const ByteCode &lhs)
+  void ReplaceInstruction(Instruction i, const VMObject &o)
   {
-    DoCopy(lhs);
-  }
-
-  ByteCode &operator=(const ByteCode &lhs)
-  {
-    if (this != &lhs)
-    {
-      DoCopy(lhs);
-    }
-    return *this;
-  }
-
-  ~ByteCode()
-  {
-    delete object;
+    instruction = i;
+    object = o;
   }
 
   Instruction GetInstruction()
@@ -44,29 +39,14 @@ public:
     return instruction;
   }
 
-  VMObject *GetObject()
+  VMObject GetObject()
   {
     return object;
   }
-
-  
+    
 private:
-  void DoCopy(const ByteCode &lhs)
-  {
-    instruction = lhs.instruction;
-
-    if (lhs.object != nullptr)
-    {
-      object = new VMObject;
-      *object = *lhs.object;
-    }
-    else
-    {
-      object = nullptr;
-    }
-  }
 
   Instruction instruction;
-  VMObject *object; // optional, used by some instructions
+  VMObject object; // optional, used by some instructions
 
 };

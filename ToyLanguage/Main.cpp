@@ -7,7 +7,6 @@
 #include "Compiler/DataStructures/AstNodes/VariableReadNode.h"
 #include "Compiler/DataStructures/AstNodes/FunctionCallNode.h"
 
-
 #include "Compiler/DataStructures/AstNodes/AstVisitor.h"
 #include "Compiler/Parser/ParseError.h"
 #include "Compiler/SemanticAnalyzer/SemanticAnalyzer.h"
@@ -16,7 +15,7 @@
 
 #include "VM/VM.h"
 #include <regex>
-void TraverseAst(const Ast_Node &node, int level = 0);
+void TraverseAst(const AstPtr &node, int level = 0);
 int main()
 {
   auto file = std::ifstream("file.txt");
@@ -31,27 +30,10 @@ int main()
 
   std::unordered_map<TokenType, std::string> tokenToString;
   tokenToString[TokenType::FUNCTION] = "Function";
-  tokenToString[TokenType::TEXT] = "Text";
   tokenToString[TokenType::NUMBER] = "Number";
   tokenToString[TokenType::LPAREN] = "Left parenthesis";
   tokenToString[TokenType::RPAREN] = "Right parenthesis";
-  tokenToString[TokenType::LBRACE] = "Left brace";
-  tokenToString[TokenType::RBRACE] = "Right brace";
-  tokenToString[TokenType::COLON] = "Colon";
-  tokenToString[TokenType::SEMICOLON] = "Semicolon";
-  tokenToString[TokenType::VARIABLE] = "Variable";
-  tokenToString[TokenType::ASSIGNMENT] = "Assignment";
-  tokenToString[TokenType::PLUS] = "Plus";
-  tokenToString[TokenType::QUOTE] = "Quote";
   tokenToString[TokenType::IDENT] = "Identifier";
-  tokenToString[TokenType::MULTIPLICATION] = "Multiplication";
-
-
-
-
-
-
-
 
   std::pair < std::vector < std::string>, std::vector<Token>> tokens;
   try
@@ -59,57 +41,40 @@ int main()
     Lexer lexer(file);
     tokens = lexer.AnalyzeText();
 
- /*   std::cout << "Lexer output:\n";
-    for (auto token : tokens.second) {
-      std::cout << "  Type: " << tokenToString[token.Type()] << "\tValue: " << token.Value() << "\tLine " << token.LineNumber() << "\n";
-    }*/
     std::cout << "\n";
     Parser parser(tokens);
 
     auto functions = parser.Parse();
-    
 
-    /*
-    std::cout << "Before semantic analysis:----------------\n\n";
+   /* std::cout << "Results of parsing:\n";
+
+
     for (auto f : functions)
     {
-      std::cout << "  Function: " << f.second.Name() << "\tDeclared at line: " << f.second.DeclarationLine() << "\t\n";
-      TraverseAst(f.second.RootNode());
-      std::cout << "\n\n";
-
+      std::cout << "Function: " << f.first << "\n";
+      TraverseAst(f.second.RootNode(), 0);
+      std::cout << "\n";
     }*/
-    
 
     SemanticAnalyzer analyzer(functions);
     functions = analyzer.Analyze();
-      
-    
-  /*  std::cout << "\nAfter semantic analysis:----------------\n\n";
+
+
+  /*  std::cout << "After semantic phase:\n";
+
     for (auto f : functions)
     {
-      std::cout << "  Function: " << f.second.Name() << "\tDeclared at line: " << f.second.DeclarationLine() << "\t\n";
-      TraverseAst(f.second.RootNode());
-      std::cout << "\n\n";
-
-    }
-
-    std::cout << "\nName-id-pairs:\n";
-    for (auto nameid : analyzer.UserFunctionIds())
-    {
-      std::cout << "Function name: " << nameid.first << "\tID: " << nameid.second << "\n";
+      std::cout << "Function: "  << f.first << "\n\n";
+      TraverseAst(f.second.RootNode(), 1);
+      std::cout << "\n";
     }*/
-
-    
-
 
     CodeGenerator generator(functions, analyzer.UserFunctionIds());
     auto code = generator.GenerateCode();
-  
 
+    
     VM vm;
- //   std::cout << "\nInitializing VM...\n";
     vm.Initialize(code);
- //   std::cout << "Executing program...\n";
     vm.Execute();
   }
   catch (const InvalidTokenError &ex)
@@ -151,53 +116,58 @@ int main()
 class AstNamePrinter : public AstVisitor
 {
 public:
-  void visit(VariableReadNode *node)
+  void Visit(VariableReadNode *node)
   {
     std::cout << "Variable";
   }
 
-  void visit(RootNode *node)
+  void Visit(RootNode *node)
   {
     std::cout << "Root";
-  }  
+  }
 
-  void visit(NumberNode *node)
+  void Visit(NumberNode *node)
   {
     std::cout << "Number";
-  }  
-  
-  void visit(FunctionCallNode *node)
+  }
+
+  void Visit(FunctionCallNode *node)
   {
     std::cout << "Function call";
+  }
+
+  virtual void Visit(IfBooleanNode *node)
+  {
+    std::cout << "IfBooleanNode(meta)";
+  }
+  
+  virtual void Visit(IfThenNode *node)
+  {
+    std::cout << "IfThenNode(meta)";
   }
 };
 
 class AstValuePrinter : public AstVisitor
 {
 public:
-  void visit(VariableReadNode *node)
+  void Visit(VariableReadNode *node)
   {
     std::cout << node->VariableId();
   }
 
-  void visit(RootNode *node)
-  {
-    
-  }
-
-  void visit(NumberNode *node)
+  void Visit(NumberNode *node)
   {
     std::cout << node->Value();
   }
 
-  void visit(FunctionCallNode *node)
+  void Visit(FunctionCallNode *node)
   {
     std::cout << node->Name();
   }
 };
 
 
-void TraverseAst(const Ast_Node &node, int level)
+void TraverseAst(const AstPtr &node, int level)
 {
   if (node == nullptr)
   {
@@ -215,10 +185,10 @@ void TraverseAst(const Ast_Node &node, int level)
   AstNamePrinter name_printer;
   AstValuePrinter value_printer;
 
-  std::cout << spaces << "Node type: "; 
+  std::cout << spaces << "Node type: ";
   node->accept(&name_printer);
-  std::cout << "\t" << spaces << "Node value: "; 
-  
+  std::cout << "\t" << spaces << "Node value: ";
+
   node->accept(&value_printer);
   std::cout << "\n";
 

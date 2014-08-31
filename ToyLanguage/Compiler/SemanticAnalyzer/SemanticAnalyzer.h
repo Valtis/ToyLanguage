@@ -18,9 +18,6 @@ private:
   
   std::unordered_map<std::string, Function>  m_functions;
   // function name - parameter count
-  std::unordered_map<std::string, int> m_inbuilt_functions;
-
   // function name_id
   std::unordered_map<std::string, int> m_user_function_ids;
-
 };

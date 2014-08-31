@@ -1,6 +1,6 @@
 #pragma once
 
-enum class VMObjectType : int { NONE, NUMBER, INTEGER };
+enum class VMObjectType : int { NONE, NUMBER, INTEGER, BOOLEAN };
 
 struct VMObject
 {
@@ -14,6 +14,7 @@ struct VMObject
   {
     double number;
     int integer;
+    bool boolean;
   } value;
 
   VMObjectType type;

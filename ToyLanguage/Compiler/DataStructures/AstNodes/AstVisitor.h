@@ -5,13 +5,40 @@ class VariableReadNode;
 class RootNode;
 class FunctionCallNode;
 
+class IfStartNode;
+class IfBooleanNode;
+class IfThenNode;
+
 class AstVisitor
 {
 public:
 
-  virtual void visit(RootNode *node) = 0;
-  virtual void visit(NumberNode *node) = 0;
-  virtual void visit(VariableReadNode *node) = 0;
-  virtual void visit(FunctionCallNode *node) = 0;
+  virtual void Visit(RootNode *node)
+  {
 
+  }
+  
+  virtual void Visit(NumberNode *node)
+  {
+
+  }
+  virtual void Visit(VariableReadNode *node)
+  {
+
+  }
+
+  virtual void Visit(FunctionCallNode *node)
+  {
+
+  }
+  
+  virtual void Visit(IfBooleanNode *node)
+  {
+
+  }
+  
+  virtual void Visit(IfThenNode *node)
+  {
+
+  }
 };

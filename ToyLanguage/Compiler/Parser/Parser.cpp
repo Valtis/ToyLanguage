@@ -34,6 +34,8 @@ Parser::Parser(std::pair<std::vector<std::string>, std::vector<Token>> &tokens) 
   m_inbuilt_functions.insert(FN_DIV);
   m_inbuilt_functions.insert(FN_PRINT);
   m_inbuilt_functions.insert(FN_PRINTLN);
+  m_inbuilt_functions.insert(FN_COMPARE);
+  m_inbuilt_functions.insert(FN_IF);
 }
 
 
@@ -130,7 +132,7 @@ void Parser::ParseFunctionBody(Function &f)
 
 
 
-void Parser::ParseFunctionCall(Function & f, Ast_Node node)
+void Parser::ParseFunctionCall(Function & f, AstPtr node)
 {
 
   if (m_functions.count(CurrentToken().Value()) == 0 && m_inbuilt_functions.count(CurrentToken().Value()) == 0 && 

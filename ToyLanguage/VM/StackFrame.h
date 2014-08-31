@@ -20,6 +20,13 @@ public:
   }
 
 
+
+  void SetInstruction(int instruction)
+  {
+    m_instruction_pointer = instruction;
+  }
+
+
   bool StackIsEmpty()
   {
     return m_operand_stack.empty();

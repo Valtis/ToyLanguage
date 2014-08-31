@@ -14,12 +14,12 @@ public:
   
   ByteCode GetByteCode(int position)
   {
-    return m_bytecode[position];
+    return m_byte_code[position];
   }
 
   void AddByteCode(ByteCode code)
   {
-    m_bytecode.push_back(code);
+    m_byte_code.push_back(code);
   }
 
   int ParameterCount() 
@@ -32,9 +32,19 @@ public:
     return m_name;
   }
 
+  std::vector<ByteCode> GetByteCode()
+  {
+    return m_byte_code;
+  }
+
+  void SetByteCode(const std::vector<ByteCode> &byte_code)
+  {
+    m_byte_code = byte_code;
+  }
+
 private:
   std::string m_name;
-  std::vector<ByteCode> m_bytecode;
+  std::vector<ByteCode> m_byte_code;
   int m_parameter_count;
 };
 

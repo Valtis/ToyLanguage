@@ -16,7 +16,7 @@ public:
 
   void accept(AstVisitor *visitor) override
   {
-    visitor->visit(this);
+    visitor->Visit(this);
   }
 private:
   int m_variable_id;

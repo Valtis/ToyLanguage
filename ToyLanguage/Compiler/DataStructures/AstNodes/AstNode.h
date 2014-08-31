@@ -1,10 +1,10 @@
 #pragma once
-#include <vector>
+#include <deque>
 #include <memory>
 
 class AstNode;
 
-typedef std::shared_ptr < AstNode > Ast_Node;
+typedef std::shared_ptr < AstNode > AstPtr;
 #include "AstVisitor.h"
 
 
@@ -16,17 +16,19 @@ public:
 
   ~AstNode();
     
-  void AddChild(Ast_Node node);
+  void AddChild(AstPtr node);
+  
+  void AddChildToLeft(AstPtr node);
 
-  void RemoveChild(Ast_Node node);
+  void RemoveChild(AstPtr node);
 
-  void ReplaceChild(Ast_Node old_node, Ast_Node new_node);
+  void ReplaceChild(AstPtr old_node, AstPtr new_node);
 
   AstNode *Parent() const;
 
-  Ast_Node GetChildByRawPointer(AstNode *node);
+  AstPtr GetChildByRawPointer(AstNode *node);
 
-  std::vector<Ast_Node> Children() const;
+  std::deque<AstPtr> Children() const;
 
   int DeclarationLine() const;
   
@@ -36,7 +38,7 @@ public:
 private:
 
   AstNode *m_parent;
-  std::vector<Ast_Node> m_children;
+  std::deque<AstPtr> m_children;
   int m_declaration_line;
 
 };

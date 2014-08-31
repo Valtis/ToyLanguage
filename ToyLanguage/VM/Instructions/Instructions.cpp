@@ -8,22 +8,22 @@
 #include <functional>
 #include <cstdio>
 void ArithmeticHelper(StackFrame &frame, VMObject(*operation)(const VMObject &, const VMObject &))
-{ 
+{
 
   VMObject second = Pop(frame);
   VMObject first = Pop(frame);
 
   if (second.type != VMObjectType::NUMBER || first.type != VMObjectType::NUMBER)
   {
-    throw InvalidOperandError("Invalid operand for arithmetic operation: number expected");
+    throw TypeError("Invalid operand for arithmetic operation: number expected");
   }
-  
+
   Push(frame, operation(first, second));
 }
 
 void Add(StackFrame &frame)
 {
-  ArithmeticHelper(frame, [](const VMObject &first, const VMObject &second) { 
+  ArithmeticHelper(frame, [](const VMObject &first, const VMObject &second) {
     VMObject o = first;
     o.value.number += second.value.number;
     return o;
@@ -57,10 +57,72 @@ void Div(StackFrame &frame)
   });
 }
 
+
+
+void JumpIfTrue(StackFrame &frame, const VMObject &location)
+{
+  VMObject truth_value = Pop(frame);
+
+  if (as_boolean(truth_value))
+  {
+    frame.SetInstruction(location.value.integer);
+  }
+}
+
+void JumpIfFalse(StackFrame &frame, const VMObject &location)
+{
+  VMObject truth_value = Pop(frame);
+
+  if (!as_boolean(truth_value))
+  {
+    frame.SetInstruction(location.value.integer);
+  }
+}
+
+
+
+void Jump(StackFrame &frame, const VMObject &location)
+{
+  frame.SetInstruction(location.value.integer);
+}
+
+void Equals(StackFrame &frame)
+{
+  VMObject second = Pop(frame);
+  VMObject first = Pop(frame);
+
+  VMObject result;
+  result.type = VMObjectType::BOOLEAN;
+  if (first.type != second.type)
+  {
+    result.value.boolean = false;
+  }
+  else
+  {
+    switch (first.type)
+    {
+    case VMObjectType::NUMBER:
+      // probably should do something like abs(a - b) < epsilon 
+      result.value.boolean = first.value.number == second.value.number;
+      break;
+    case VMObjectType::INTEGER:
+      result.value.boolean = first.value.integer == second.value.integer;
+      break;
+    case VMObjectType::BOOLEAN:
+      result.value.boolean = first.value.boolean == second.value.boolean;
+      break;
+
+    }
+
+  }
+
+  frame.Push(result);
+}
+
 void CallFunction(VM *vm, StackFrame &frame)
 {
   int new_function_id = Pop(frame).value.integer;
-  
+
   StackFrame new_frame(new_function_id);
 
   VMFunction f = vm->Function(new_function_id);
@@ -89,12 +151,12 @@ void Return(VM *vm, StackFrame &frame)
   }
 
   vm->PopFrame();
-  
-  for (auto it = objects.rbegin(); it != objects.rend(); ++it) 
-  { 
+
+  for (auto it = objects.rbegin(); it != objects.rend(); ++it)
+  {
     Push(vm->CurrentFrame(), *it);
   }
-  
+
 }
 
 

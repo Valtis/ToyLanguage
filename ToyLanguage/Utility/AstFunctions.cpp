@@ -1,6 +1,6 @@
 #include "AstFunctions.h"
 
-void TraverseAst(Ast_Node &node, AstVisitor *visitor)
+void TraverseAst(AstPtr &node, AstVisitor *visitor)
 {
   if (node == nullptr)
   {

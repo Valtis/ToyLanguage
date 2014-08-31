@@ -8,6 +8,11 @@ void Sub(StackFrame &frame);
 void Mul(StackFrame &frame);
 void Div(StackFrame &frame);
 
+void JumpIfTrue(StackFrame &frame, const VMObject &location);
+void JumpIfFalse(StackFrame &frame, const VMObject &location);
+void Jump(StackFrame &frame, const VMObject &location);
+
+void Equals(StackFrame &frame);
 
 void CallFunction(VM *vm, StackFrame &frame);
 void Return(VM *vm, StackFrame &frame);

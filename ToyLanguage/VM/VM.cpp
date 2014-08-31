@@ -46,8 +46,20 @@ void VM::Execute()
     case Instruction::PRINTLINE:
       PrintLine(m_frames.back());
       break;
+    case Instruction::COMPARE:
+      Equals(m_frames.back());
+      break;
 
+    case Instruction::JUMP_IF_TRUE:
+      JumpIfTrue(m_frames.back(), code.GetObject());
+      break;
 
+    case Instruction::JUMP_IF_FALSE:
+      JumpIfFalse(m_frames.back(), code.GetObject());
+      break;
+    case Instruction::JUMP:
+      Jump(m_frames.back(), code.GetObject()); 
+        break;
 
     case Instruction::CALLFUNCTION:
       CallFunction(this, m_frames.back());
@@ -57,10 +69,10 @@ void VM::Execute()
       break;
 
     case Instruction::PUSH:
-      Push(m_frames.back(), *code.GetObject());
+      Push(m_frames.back(), code.GetObject());
       break;
     case Instruction::PUSH_VARIABLE:
-      PushVariable(m_frames.back(), *code.GetObject());
+      PushVariable(m_frames.back(), code.GetObject());
       break;
 
     default:

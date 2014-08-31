@@ -1,10 +1,11 @@
 #pragma once
+#include <string>
 #include "AstNode.h"
 
-class RootNode : public AstNode
+class IfBooleanNode : public AstNode
 {
 public:
-  RootNode(int declaration_line) : AstNode(declaration_line)
+  IfBooleanNode() : AstNode(0)
   {
 
   }
@@ -13,4 +14,7 @@ public:
   {
     visitor->Visit(this);
   }
+
+private:
+
 };

@@ -18,7 +18,7 @@ public:
 
   void accept(AstVisitor *visitor) override
   {
-    visitor->visit(this);
+    visitor->Visit(this);
   }
 
 private:

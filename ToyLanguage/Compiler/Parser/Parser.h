@@ -31,7 +31,7 @@ private:
 
   void ParseFunctionArguments(Function &f);
   void ParseFunctionBody(Function &f);
-  void ParseFunctionCall(Function & f, Ast_Node node);
+  void ParseFunctionCall(Function & f, AstPtr node);
   void CheckIfParameterShadowsFunction(std::string parameterName);
   std::vector<std::string> m_lines;
   std::vector<Token> m_tokens;
@@ -40,7 +40,7 @@ private:
   std::unordered_map<std::string, Function> m_functions;
   std::set<std::string> m_inbuilt_functions;
 
-  Ast_Node m_root_node;
+  AstPtr m_root_node;
 
 };
 

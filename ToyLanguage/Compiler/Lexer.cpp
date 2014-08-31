@@ -7,27 +7,21 @@
 Lexer::Lexer(std::istream &input) : m_input(input), m_current_line(1)
 {
 
-  m_reserved_words = { "fn", "while", "if", "var" };
+  m_reserved_words = { "fn" };
 
   m_string_tokens["fn"] = TokenType::FUNCTION;
-  m_string_tokens["while"] = TokenType::WHILE;
-  m_string_tokens["if"] = TokenType::IF;
   m_string_tokens["("] = TokenType::LPAREN;
   m_string_tokens[")"] = TokenType::RPAREN;
-  m_string_tokens["{"] = TokenType::LBRACE;
-  m_string_tokens["}"] = TokenType::RBRACE;
-  m_string_tokens[","] = TokenType::COMMA;
-  m_string_tokens[":"] = TokenType::COLON;
-  m_string_tokens[";"] = TokenType::SEMICOLON;
-  m_string_tokens["var"] = TokenType::VARIABLE;
-  m_string_tokens["\""] = TokenType::QUOTE;
+  m_string_tokens["#"] = TokenType::QUOTE;
 
   // inbuilt functions
   m_string_tokens["="] = TokenType::IDENT;
   m_string_tokens["+"] = TokenType::IDENT;
   m_string_tokens["-"] = TokenType::IDENT;
   m_string_tokens["*"] = TokenType::IDENT;
-  m_string_tokens["/"] = TokenType::IDENT;
+  m_string_tokens["/"] = TokenType::IDENT; 
+  m_string_tokens["="] = TokenType::IDENT;
+
 }
 
 

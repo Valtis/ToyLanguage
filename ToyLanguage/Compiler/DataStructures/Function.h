@@ -54,7 +54,7 @@ private:
   std::vector<std::string> m_parameters;
 
   std::string m_name;
-  Ast_Node m_root_node;
+  AstPtr m_root_node;
 
 };
 
