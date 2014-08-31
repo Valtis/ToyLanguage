@@ -1,16 +1,27 @@
-(fn helper (acc n) 
+(fn factorial-helper (acc n) 
    (if (= n 0) acc
-    (helper (* acc n) (- n 1))
+    (factorial-helper (* acc n) (- n 1))
   )
 )
 
 (fn factorial (n) 
-	(helper 1 n)
+	(factorial-helper 1 n)
+)
+
+
+(fn power-helper (acc n k)
+	(if (= k 0) acc
+	  (power-helper (* acc n) n (- k 1))
+	)
+)
+
+(fn power (n k)
+	(power-helper 1 n k)
 )
 
 
 (fn main ()
-    (println (factorial 7))
+    (println (factorial 7) (power 5 4))
 )
 
 
