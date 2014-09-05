@@ -26,14 +26,16 @@ std::unordered_map<std::string, Function> SemanticAnalyzer::Analyze()
 
 void SemanticAnalyzer::GenerateUserFunctionIds()
 {
-  m_user_function_ids["main"] = MAIN_FUNCTION_ID;
-
   int id = MAIN_FUNCTION_ID + 1;
-  for (auto name_function_pair : m_functions)
+  for (auto &name_function_pair : m_functions)
   {
     if (name_function_pair.first != "main")
     {
-      m_user_function_ids[name_function_pair.first] = id++;
+      name_function_pair.second.FunctionId(id++);
+    } 
+    else
+    {
+      name_function_pair.second.FunctionId(MAIN_FUNCTION_ID);
     }
   }
 }

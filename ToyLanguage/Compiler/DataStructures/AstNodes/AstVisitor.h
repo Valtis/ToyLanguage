@@ -4,6 +4,7 @@ class NumberNode;
 class VariableReadNode;
 class RootNode;
 class FunctionCallNode;
+class FunctionParameterNode;
 
 class IfStartNode;
 class IfBooleanNode;
@@ -38,6 +39,11 @@ public:
   }
   
   virtual void Visit(IfThenNode *node)
+  {
+
+  }
+
+  virtual void Visit(FunctionParameterNode *node)
   {
 
   }

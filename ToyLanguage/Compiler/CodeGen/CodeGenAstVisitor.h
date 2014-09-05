@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <string>
 
-
+#include "../DataStructures/Function.h"
 #include "../DataStructures/AstNodes/AstVisitor.h"
 #include "../../VM/ByteCode.h"
 
@@ -10,7 +10,7 @@ class VMFunction;
 class CodeGenAstVisitor : public AstVisitor
 {
 public:
-  CodeGenAstVisitor(VMFunction *f, std::unordered_map<std::string, int> function_names_to_ids);
+  CodeGenAstVisitor(VMFunction *f, std::unordered_map<std::string, Function> functions);
 
   void Visit(RootNode *node) override;
   void Visit(NumberNode *node) override;
@@ -18,6 +18,7 @@ public:
   void Visit(FunctionCallNode *node) override;
   void Visit(IfBooleanNode *node) override;
   void Visit(IfThenNode *node) override;
+  void Visit(FunctionParameterNode *node) override;
 
 
 private:
@@ -32,7 +33,7 @@ private:
 
 
   // maps function names to the ids that are actually used by the vm
-  std::unordered_map<std::string, int> m_function_names_to_ids;
+  std::unordered_map<std::string, Function> m_functions;
 
   VMFunction *m_function;
 };

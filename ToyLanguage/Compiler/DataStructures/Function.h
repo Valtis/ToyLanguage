@@ -47,9 +47,19 @@ public:
   {
     return m_parameters.size();
   }
+
+  int FunctionId()
+  {
+    return m_function_id;
+  }
   
+  void FunctionId(int id)
+  {
+    m_function_id = id;
+  }
 private:
   int m_declaration_line;
+  int m_function_id;
   
   std::vector<std::string> m_parameters;
 

@@ -69,7 +69,7 @@ int main()
       std::cout << "\n";
     }*/
 
-    CodeGenerator generator(functions, analyzer.UserFunctionIds());
+    CodeGenerator generator(functions);
     auto code = generator.GenerateCode();
 
     

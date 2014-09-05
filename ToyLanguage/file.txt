@@ -21,7 +21,7 @@
 
 
 (fn main ()
-    (map println (list 5 4 3 2 1))
+    (println (power 5 3))
 )
 
 

@@ -3,6 +3,7 @@
 #include "NumberNode.h"
 #include "VariableReadNode.h"
 #include "FunctionCallNode.h"
+#include "FunctionParameterNode.h"
 
 #include "IfBooleanNode.h"
 #include "IfThenNode.h"
@@ -27,6 +28,14 @@ AstPtr CreateFunctionCallNode(int declaration_line, const std::string &name)
 {
   return std::make_shared<FunctionCallNode>(declaration_line, name);
 }
+
+AstPtr CreateFunctionParameterNode(int declaration_line, const std::string &name)
+{
+  return std::make_shared<FunctionParameterNode>(declaration_line, name);
+}
+
+
+
 
 AstPtr CreateIfBooleanNode()
 {

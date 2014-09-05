@@ -5,6 +5,7 @@
 #include "../DataStructures/AstNodes/NumberNode.h"
 #include "../DataStructures/AstNodes/VariableReadNode.h"
 #include "../DataStructures/AstNodes/FunctionCallNode.h"
+#include "../DataStructures/AstNodes/FunctionParameterNode.h"
 #include "../DataStructures/AstNodes/RootNode.h"
 
 
@@ -18,8 +19,8 @@
 #define JUMP_TO_END 3
 
 CodeGenAstVisitor::CodeGenAstVisitor(VMFunction *f,
-  std::unordered_map<std::string, int> function_names_to_ids)
-  : m_function(f), m_function_names_to_ids(function_names_to_ids)
+  std::unordered_map<std::string, Function> functions)
+  : m_function(f), m_functions(functions)
 {
 
   std::unordered_map<std::string, Instruction> inbuilt_functions = { { FN_ADD, Instruction::ADD },
@@ -51,6 +52,16 @@ void CodeGenAstVisitor::Visit(NumberNode *node)
   o.value.number = node->Value();
   m_function->AddByteCode(ByteCode{ Instruction::PUSH, o });
 }
+
+void CodeGenAstVisitor::Visit(FunctionParameterNode *node)
+{
+  VMObject o;
+
+  o.type = VMObjectType::INTEGER;
+  o.value.integer = m_functions[node->Name()].FunctionId();
+  m_function->AddByteCode(ByteCode{ Instruction::PUSH, o });
+}
+
 
 void CodeGenAstVisitor::Visit(VariableReadNode *node)
 {
@@ -84,7 +95,7 @@ void CodeGenAstVisitor::Visit(FunctionCallNode *node)
   }
   else
   {
-    int id = m_function_names_to_ids[node->Name()];
+    int id = m_functions[node->Name()].FunctionId();
     VMObject o;
 
     o.type = VMObjectType::INTEGER;
