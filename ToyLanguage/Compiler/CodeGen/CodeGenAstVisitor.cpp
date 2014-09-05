@@ -60,17 +60,25 @@ void CodeGenAstVisitor::Visit(VariableReadNode *node)
   m_function->AddByteCode(ByteCode{ Instruction::PUSH_VARIABLE, o });
 }
 
-
+// TODO: Extract inbuilt function handling into separate classes instead of creating massive if/else-monstrosity here
+// map<std::string(name), FunctionCodeGenerator(inbuild_type)>
+// can move arithmetic function transformation from semantic analyzer into generator class
 void CodeGenAstVisitor::Visit(FunctionCallNode *node)
 {
 
   if (node->Name() == FN_IF)
   {
     GenerateJumpsForIf(node);
-    return;
+  } 
+  else if (node->Name() == FN_LIST)
+  {
+    CreateList(node);
   }
-
-  if (m_inbuilt_functions.count(node->Name()))
+  else if (node->Name() == FN_MAP)
+  {
+    CreateMapping(node);
+  }
+  else if (m_inbuilt_functions.count(node->Name()))
   {
     m_function->AddByteCode(ByteCode{ m_inbuilt_functions[node->Name()] });
   }
@@ -146,4 +154,44 @@ void CodeGenAstVisitor::Visit(IfThenNode *node)
   o.type = VMObjectType::INTEGER;
   o.value.integer = JUMP_TO_END;
   m_function->AddByteCode(ByteCode{ Instruction::NOP, o });
+}
+
+
+void CodeGenAstVisitor::CreateList(FunctionCallNode *node)
+{
+  size_t child_count = node->Children().size();
+  VMObject o;
+
+  o.type = VMObjectType::INTEGER;
+  o.value.integer = 0;
+  
+  // allocate nullptr
+  m_function->AddByteCode(ByteCode{ Instruction::PUSH, o });
+  m_function->AddByteCode(ByteCode{ Instruction::ALLOCATE_PTR });
+
+  for (size_t i = 0; i < child_count; ++i)
+  {
+    // allocate space for 2 VMObjects (pointer to next, value)
+    o.value.integer = 2;
+    m_function->AddByteCode(ByteCode{ Instruction::PUSH, o });
+    m_function->AddByteCode(ByteCode{ Instruction::ALLOCATE_PTR });
+
+
+    // write the next_ptr field
+    o.value.integer = 0;
+
+    m_function->AddByteCode(ByteCode{ Instruction::PUSH, o });
+    m_function->AddByteCode(ByteCode{ Instruction::WRITE_PTR });
+
+    // write the value field
+    o.value.integer = 1;
+
+    m_function->AddByteCode(ByteCode{ Instruction::PUSH, o });
+    m_function->AddByteCode(ByteCode{ Instruction::WRITE_PTR });
+  }
+}
+
+void CodeGenAstVisitor::CreateMapping(FunctionCallNode *node)
+{
+
 }

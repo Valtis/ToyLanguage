@@ -21,8 +21,9 @@
 
 
 (fn main ()
-    (println (factorial 7) (power 5 4))
+    (map println (list 5 4 3 2 1))
 )
+
 
 
 

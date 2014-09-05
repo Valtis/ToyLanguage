@@ -36,6 +36,11 @@ Parser::Parser(std::pair<std::vector<std::string>, std::vector<Token>> &tokens) 
   m_inbuilt_functions.insert(FN_PRINTLN);
   m_inbuilt_functions.insert(FN_COMPARE);
   m_inbuilt_functions.insert(FN_IF);
+  m_inbuilt_functions.insert(FN_MAP);
+  m_inbuilt_functions.insert(FN_LIST);
+
+
+
 }
 
 

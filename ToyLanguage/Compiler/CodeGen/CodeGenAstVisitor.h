@@ -23,6 +23,8 @@ public:
 private:
 
   void GenerateJumpsForIf(FunctionCallNode *node);
+  void CreateList(FunctionCallNode *node);
+  void CreateMapping(FunctionCallNode *node);
 
   // maps inbuilt functions to vm instructions
   std::unordered_map<std::string, Instruction> m_inbuilt_functions;

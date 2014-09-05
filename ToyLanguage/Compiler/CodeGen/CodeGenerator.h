@@ -9,7 +9,7 @@
 class CodeGenerator
 {
 public:
-  CodeGenerator::CodeGenerator(const std::unordered_map<std::string, Function> functions, const std::unordered_map<std::string, int> function_name_ids);
+  CodeGenerator(const std::unordered_map<std::string, Function> functions, const std::unordered_map<std::string, int> function_name_ids);
 
   std::unordered_map<int, VMFunction> GenerateCode();
   

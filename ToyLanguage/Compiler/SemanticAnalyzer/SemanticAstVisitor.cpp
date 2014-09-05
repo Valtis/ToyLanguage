@@ -17,7 +17,7 @@ SemanticAstVisitor::SemanticAstVisitor(std::unordered_map<std::string, Function>
 
   std::unordered_map<std::string, ChildCount> limits = { { FN_ADD, { 2, 2 } }, { FN_SUB, { 2, 2 } },
       { FN_MUL, { 2, 2 } }, { FN_DIV, { 2, 2 } }, { FN_PRINT, { 1, 1 } }, { FN_PRINTLN, { 1, 1 } }, 
-      { FN_COMPARE, { 2, 2 } }, { FN_IF, { 2, 3 } }
+      { FN_COMPARE, { 2, 2 } }, { FN_IF, { 2, 3 } }, { FN_LIST, { 1, NOT_RESTRICTED } }, { FN_MAP, { 2, NOT_RESTRICTED } }
       };
 
   // workaround for compiler error C2593 
@@ -78,6 +78,7 @@ void SemanticAstVisitor::TransformInbuiltFunctionsWithMaxChildrenLimitation(Func
 }
 
 
+// todo: clean up as this is becoming horrible
 void SemanticAstVisitor::CheckInbuiltFunctionParameterCount(FunctionCallNode *node)
 {
   ChildCount count = m_inbuilt_function_child_count[node->Name()]; 
@@ -98,6 +99,15 @@ void SemanticAstVisitor::CheckInbuiltFunctionParameterCount(FunctionCallNode *no
 
     throw ParameterCountMismatchError(error, node->DeclarationLine());
   }
+
+ /* // horrible hack. Clean this up
+  if (node->Name() == FN_MAP)
+  {
+    std::string function_param_name = (node->Children()[1]->
+    
+
+  }*/
+
 }
 
 

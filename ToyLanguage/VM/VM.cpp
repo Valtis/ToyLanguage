@@ -2,6 +2,13 @@
 #include "Instructions/Instructions.h"
 #include "VMError.h"
 #include <string>
+
+// 10 megabyte heap for now
+VM::VM() : m_memory_manager(1024 * 1024 * 10)
+{
+
+}
+
 void VM::Initialize(std::unordered_map<int, VMFunction> code)
 {
   m_functions = code;
@@ -10,8 +17,6 @@ void VM::Initialize(std::unordered_map<int, VMFunction> code)
   m_frame_pointer = 0;
 
   m_frames.push_back(StackFrame(MAIN_FUNCTION_ID));
-
-
 }
 
 void VM::Execute()
@@ -73,6 +78,18 @@ void VM::Execute()
       break;
     case Instruction::PUSH_VARIABLE:
       PushVariable(m_frames.back(), code.GetObject());
+      break;
+
+    case Instruction::ALLOCATE_PTR:
+      AllocatePtr(m_frames.back(), m_memory_manager);
+      break;
+
+    case Instruction::WRITE_PTR:
+      WritePtr(m_frames.back(), m_memory_manager);
+      break;
+
+    case Instruction::READ_PTR:
+      ReadPtr(m_frames.back(), m_memory_manager);
       break;
 
     default:

@@ -8,3 +8,5 @@
 #define FN_PRINTLN "println"
 #define FN_COMPARE "="
 #define FN_IF "if"
+#define FN_MAP "map"
+#define FN_LIST "list"

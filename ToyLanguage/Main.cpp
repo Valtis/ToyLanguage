@@ -18,7 +18,7 @@
 void TraverseAst(const AstPtr &node, int level = 0);
 int main()
 {
-  auto file = std::ifstream("file.txt");
+  std::ifstream file("file.txt");
   if (!file.is_open())
   {
     std::cout << "Could not open file\n";

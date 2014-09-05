@@ -1,6 +1,7 @@
 #pragma once
+#include "GC/VMPointer.h"
+enum class VMObjectType : int { NONE, NUMBER, INTEGER, BOOLEAN, POINTER };
 
-enum class VMObjectType : int { NONE, NUMBER, INTEGER, BOOLEAN };
 
 struct VMObject
 {
@@ -15,6 +16,7 @@ struct VMObject
     double number;
     int integer;
     bool boolean;
+    VMPointer *pointer;
   } value;
 
   VMObjectType type;

@@ -2,7 +2,8 @@
 #include <cstdint>
 #include "VMObject.h"
 
-enum class Instruction : std::uint8_t { NOP, ADD, SUB, MUL, DIV, STOP, PUSH, PUSH_VARIABLE, POP, CALLFUNCTION, RETURN, PRINT, PRINTLINE, JUMP_IF_TRUE, JUMP_IF_FALSE, JUMP, COMPARE };
+enum class Instruction : std::uint8_t { NOP, ADD, SUB, MUL, DIV, STOP, PUSH, PUSH_VARIABLE, POP, CALLFUNCTION, RETURN,
+  PRINT, PRINTLINE, JUMP_IF_TRUE, JUMP_IF_FALSE, JUMP, COMPARE, ALLOCATE_PTR, READ_PTR, WRITE_PTR };
 
 class ByteCode
 {

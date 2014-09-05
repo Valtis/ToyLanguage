@@ -4,10 +4,12 @@
 #include <unordered_map>
 #include "StackFrame.h"
 #include "VMFunction.h"
+#include "GC/MemoryManager.h"
 class VM
 {
 public:
 
+  VM();
   void Initialize(std::unordered_map<int, VMFunction> code);
   void Execute();
   
@@ -39,4 +41,5 @@ private:
   std::vector<StackFrame> m_frames;
 
   std::unordered_map<int, VMFunction> m_functions;
+  MemoryManager m_memory_manager;
 };

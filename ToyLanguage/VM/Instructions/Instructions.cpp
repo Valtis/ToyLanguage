@@ -1,9 +1,10 @@
 #include "Instructions.h"
 #include "ConversionFunctions.h"
-#include "..\StackFrame.h"
-#include "..\VMObject.h"
-#include "..\VM.h"
-#include "..\VMError.h"
+#include "../StackFrame.h"
+#include "../VMObject.h"
+#include "../VM.h"
+#include "../VMError.h"
+#include "../GC\MemoryManager.h"
 
 #include <functional>
 #include <cstdio>
@@ -86,6 +87,15 @@ void Jump(StackFrame &frame, const VMObject &location)
   frame.SetInstruction(location.value.integer);
 }
 
+void IsNullPointer(StackFrame &frame)
+{
+  VMObject ptr = Pop(frame);
+  VMObject o;
+  o.type = VMObjectType::BOOLEAN;
+  o.value.boolean = ptr.value.pointer == nullptr;
+  Push(frame, o);
+}
+
 void Equals(StackFrame &frame)
 {
   VMObject second = Pop(frame);
@@ -111,7 +121,6 @@ void Equals(StackFrame &frame)
     case VMObjectType::BOOLEAN:
       result.value.boolean = first.value.boolean == second.value.boolean;
       break;
-
     }
 
   }
@@ -170,6 +179,33 @@ void PrintLine(StackFrame &frame)
 {
   VMObject o = Pop(frame);
   puts(as_string(o).c_str());
+}
+
+void AllocatePtr(StackFrame &frame, MemoryManager &manager)
+{
+
+  VMObject size = Pop(frame);
+  Push(frame, manager.Allocate(sizeof(VMObject)*size.value.integer));  
+}
+
+void WritePtr(StackFrame &frame, MemoryManager &manager)
+{
+  VMObject offset = Pop(frame);
+  VMObject pointer = Pop(frame);
+  VMObject value = Pop(frame);
+  
+  manager.Write(pointer, offset.value.integer*sizeof(VMObject), value);
+
+  Push(frame, pointer);
+}
+
+void ReadPtr(StackFrame &frame, MemoryManager &manager)
+{
+
+  VMObject offset = Pop(frame);
+  VMObject pointer = Pop(frame);
+  Push(frame, pointer);
+  Push(frame, manager.Read(pointer, offset.value.integer*sizeof(VMObject)));
 }
 
 void PushVariable(StackFrame &frame, const VMObject &o)
