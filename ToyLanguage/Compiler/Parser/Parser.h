@@ -32,6 +32,7 @@ private:
   void ParseFunctionArguments(Function &f);
   void ParseFunctionBody(Function &f);
   void ParseFunctionCall(Function & f, AstPtr node);
+  void ParseFunctionCallArguments(Function &f, AstPtr node);
   void CheckIfParameterShadowsFunction(std::string parameterName);
   std::vector<std::string> m_lines;
   std::vector<Token> m_tokens;
