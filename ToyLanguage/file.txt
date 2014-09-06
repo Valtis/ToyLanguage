@@ -1,27 +1,7 @@
-(fn factorial-helper (acc n) 
-   (if (= n 0) acc
-    (factorial-helper (* acc n) (- n 1))
-  )
-)
-
-(fn factorial (n) 
-	(factorial-helper 1 n)
-)
-
-
-(fn power-helper (acc n k)
-	(if (= k 0) acc
-	  (power-helper (* acc n) n (- k 1))
-	)
-)
-
-(fn power (n k)
-	(power-helper 1 n k)
-)
-
+(fn my-printer (a) (println (+ a 5)))
 
 (fn main ()
-    (println (power 5 3))
+    (map my-printer (list 1 2 3 4 5 25 24 23 22))
 )
 
 

@@ -52,9 +52,11 @@ void VM::Execute()
       PrintLine(m_frames.back());
       break;
     case Instruction::COMPARE:
-      Equals(m_frames.back());
+      Compare(m_frames.back());
       break;
-
+    case Instruction::COMPARE_NULL:
+      CompareNull(m_frames.back());
+      break;
     case Instruction::JUMP_IF_TRUE:
       JumpIfTrue(m_frames.back(), code.GetObject());
       break;
@@ -76,8 +78,15 @@ void VM::Execute()
     case Instruction::PUSH:
       Push(m_frames.back(), code.GetObject());
       break;
-    case Instruction::PUSH_VARIABLE:
-      PushVariable(m_frames.back(), code.GetObject());
+
+    case Instruction::POP:
+      Pop(m_frames.back());
+      break;
+    case Instruction::LOAD_VARIABLE:
+      LoadVariable(m_frames.back(), code.GetObject());
+      break;
+    case Instruction::STORE_VARIABLE:
+      StoreVariable(m_frames.back(), code.GetObject());
       break;
 
     case Instruction::ALLOCATE_PTR:
@@ -90,6 +99,10 @@ void VM::Execute()
 
     case Instruction::READ_PTR:
       ReadPtr(m_frames.back(), m_memory_manager);
+      break;
+
+    case Instruction::SWAP:
+      Swap(m_frames.back());
       break;
 
     default:

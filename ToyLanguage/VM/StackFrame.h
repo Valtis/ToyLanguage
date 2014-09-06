@@ -54,6 +54,15 @@ public:
     return m_local_variables[id];
   }
 
+  void SetVariable(const int id, VMObject o)
+  {
+    if (m_local_variables.size() <= id)
+    {
+      m_local_variables.resize(id + 1);
+    }
+    m_local_variables[id] = o;
+  }
+
 private:
   int m_functionID;
   int m_instruction_pointer;

@@ -1,6 +1,7 @@
 #pragma once
 #include "GC/VMPointer.h"
-enum class VMObjectType : int { NONE, NUMBER, INTEGER, BOOLEAN, POINTER };
+#include <cstdint>
+enum class VMObjectType : uint8_t { NONE, NUMBER, INTEGER, BOOLEAN, POINTER };
 
 
 struct VMObject

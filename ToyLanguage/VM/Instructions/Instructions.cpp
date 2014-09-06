@@ -96,7 +96,7 @@ void IsNullPointer(StackFrame &frame)
   Push(frame, o);
 }
 
-void Equals(StackFrame &frame)
+void Compare(StackFrame &frame)
 {
   VMObject second = Pop(frame);
   VMObject first = Pop(frame);
@@ -126,6 +126,18 @@ void Equals(StackFrame &frame)
   }
 
   frame.Push(result);
+}
+
+// does not consume the pointer the value is being compared to
+void CompareNull(StackFrame &frame)
+{
+  VMObject first = Pop(frame);
+  VMObject answer;
+  answer.type = VMObjectType::BOOLEAN;
+  answer.value.boolean = first.value.pointer == nullptr;
+  
+  Push(frame, first);
+  Push(frame, answer);
 }
 
 void CallFunction(VM *vm, StackFrame &frame)
@@ -208,11 +220,19 @@ void ReadPtr(StackFrame &frame, MemoryManager &manager)
   Push(frame, manager.Read(pointer, offset.value.integer*sizeof(VMObject)));
 }
 
-void PushVariable(StackFrame &frame, const VMObject &o)
+void LoadVariable(StackFrame &frame, const VMObject &o)
 {
   int variable_id = o.value.integer;
   Push(frame, frame.GetVariable(variable_id));
 }
+
+void StoreVariable(StackFrame &frame, const VMObject &o)
+{
+  int variable_id = o.value.integer;
+  VMObject value = Pop(frame);
+  frame.SetVariable(variable_id, value);
+}
+
 
 void Push(StackFrame &frame, const VMObject &o)
 {
@@ -222,4 +242,13 @@ void Push(StackFrame &frame, const VMObject &o)
 VMObject Pop(StackFrame &frame)
 {
   return frame.Pop();
+}
+
+void Swap(StackFrame &frame)
+{
+  auto o1 = Pop(frame);
+  auto o2 = Pop(frame);
+
+  Push(frame, o1);
+  Push(frame, o2);
 }

@@ -23,6 +23,8 @@ CodeGenAstVisitor::CodeGenAstVisitor(VMFunction *f,
   : m_function(f), m_functions(functions)
 {
 
+  m_next_local_variable_id = m_function->ParameterCount();
+
   std::unordered_map<std::string, Instruction> inbuilt_functions = { { FN_ADD, Instruction::ADD },
   { FN_SUB, Instruction::SUB }, { FN_MUL, Instruction::MUL }, { FN_DIV, Instruction::DIV },
   { FN_PRINT, Instruction::PRINT }, { FN_PRINTLN, Instruction::PRINTLINE }, { FN_COMPARE, Instruction::COMPARE } };
@@ -68,7 +70,7 @@ void CodeGenAstVisitor::Visit(VariableReadNode *node)
   VMObject o;
   o.type = VMObjectType::INTEGER;
   o.value.integer = node->VariableId();
-  m_function->AddByteCode(ByteCode{ Instruction::PUSH_VARIABLE, o });
+  m_function->AddByteCode(ByteCode{ Instruction::LOAD_VARIABLE, o });
 }
 
 // TODO: Extract inbuilt function handling into separate classes instead of creating massive if/else-monstrosity here
@@ -202,7 +204,41 @@ void CodeGenAstVisitor::CreateList(FunctionCallNode *node)
   }
 }
 
+
+// todo - find a way to generate code without hand writing the bytecode...
 void CodeGenAstVisitor::CreateMapping(FunctionCallNode *node)
 {
+  int store_id = m_next_local_variable_id++;
+  // stack will contain function id - list ptr; swap them around so that id is the topmost
+  m_function->AddByteCode(ByteCode{ Instruction::SWAP });
+
+  VMObject o;
+  o.type = VMObjectType::INTEGER;
+  o.value.integer = store_id;
+  // store the mapped function id to local variable
+  m_function->AddByteCode(ByteCode{ Instruction::STORE_VARIABLE, o });
+
+  int compare_pos = m_function->GetByteCode().size();
+
+  m_function->AddByteCode(ByteCode{ Instruction::COMPARE_NULL }); // check if pointer is null
+
+  o.value.integer = m_function->GetByteCode().size() + 10; // 10 as we need to skip 9 instructions and jump to the 10th that follows
+  m_function->AddByteCode(ByteCode{ Instruction::JUMP_IF_TRUE, o }); // if so, jump to end
+  o.value.integer = 1;
+  m_function->AddByteCode(ByteCode{ Instruction::PUSH, o }); // push the field number to stack
+  m_function->AddByteCode(ByteCode{ Instruction::READ_PTR }); // read the linked list field 1 and push the value on stack
+ 
+  o.value.integer = store_id;
+  m_function->AddByteCode(ByteCode{ Instruction::LOAD_VARIABLE, o}); // copy function id from local variable to stack
+  m_function->AddByteCode(ByteCode{ Instruction::CALLFUNCTION }); // call the function; will consume function id & the value from linked list
+  // at this point stack contains the original list pointer + whatever was below it (we don't care about that here)
+  o.value.integer = 0;
+  m_function->AddByteCode(ByteCode{ Instruction::PUSH, o });
+  m_function->AddByteCode(ByteCode{ Instruction::READ_PTR }); // read the next-field from linked list list field
+  m_function->AddByteCode(ByteCode{ Instruction::SWAP }); // swap the values so that original pointer is on top
+  m_function->AddByteCode(ByteCode{ Instruction::POP }); // pop it from stack
+
+  o.value.integer = compare_pos;
+  m_function->AddByteCode(ByteCode{ Instruction::JUMP, o }); // jump to null check
 
 }

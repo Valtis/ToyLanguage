@@ -36,4 +36,5 @@ private:
   std::unordered_map<std::string, Function> m_functions;
 
   VMFunction *m_function;
+  int m_next_local_variable_id;
 };

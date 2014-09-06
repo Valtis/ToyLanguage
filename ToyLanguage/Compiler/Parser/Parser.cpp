@@ -37,6 +37,8 @@ m_tokens(tokens.second), m_current_token(m_tokens.begin())
   m_inbuilt_functions.insert(FN_COMPARE);
   m_inbuilt_functions.insert(FN_IF);
   m_inbuilt_functions.insert(FN_LIST);
+  m_inbuilt_functions.insert(FN_MAP);
+
 }
 
 
